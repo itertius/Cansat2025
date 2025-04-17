@@ -6,25 +6,139 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <title>Cansat Webserver</title>
 </head>
+
 <body>
-    
+
 <div class="parent">
-    <div class="head">1</div>
-    <div class="foot">3</div>
+
+    <div class="head">
+        <div class="head-left">
+            <span id="time"></span>
+        </div>
+        <div class="head-right">
+            Runtime :<span id="runtime">0</span>sec
+        </div>
+    </div>
+     
     <div class="c-map">
         <div id="map"></div>
     </div>
-    <div class="bmp">10</div>
-    <div class="gy">11</div>
-    <div class="gps">12</div>
+    
+    <div class="bmp">
+        <div class="title">🌡️ BMP280</div>
+    
+        <div class="content">
+            <div class="temp">
+                Temperature : <span id="temp">0</span> °C
+            </div>
+            <div class="press">
+                Pressure : <span id="press">0</span> hPa
+            </div>
+            <div class="bmp-alt">
+                BMP280 Altitude : <span id="bmp-alt">0</span> m
+            </div>
+        </div>
+
+        <div class="footer">
+            <button class="btn" id="bmp-log" onclick="DownloadModuleLog('BMP280')">📤 Download BMP280 Log</button>
+        </div>
+
+    </div>
+    
+    
+    
+    <div class="gyro">
+        <div class="title">🧨 GY-521</div>
+
+        <div class="content-lr">
+            <div class="content-left">
+                <div class="ax">
+                    X : <span id="ax">0</span> g
+                </div>
+                <div class="ay">
+                    Y : <span id="ay">0</span> g
+                </div>
+                <div class="az">
+                    Z : <span id="az">0</span> g
+                </div>
+            </div>
+            <div class="content-right">
+                <div class="gx">
+                    X : <span id="gx">0</span> °/s
+                </div>
+                <div class="gy">
+                    Y : <span id="gy">0</span> °/s
+                </div>
+                <div class="gz">
+                    Z : <span id="gz">0</span> °/s
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <button class="btn" id="gy-log" onclick="DownloadModuleLog('GY-521')">📤 Download GY-521 Log</button>
+        </div>
+        
+    </div>
+
+    
+    <div class="gps">
+        <div class="title">🧭 GY-NEO6MV2 (GPS)</div>
+    
+        <div class="content">
+            <div class="position">ตำแหน่งที่ : <span id="pos">0</span></div>
+            <div class="lat">Latitude : <span id="lat">0</span></div>
+            <div class="lng">Longitude : <span id="lon">0</span></div>
+            <div class="gps-alt">Altitude : <span id="gps-alt">0</span> m</div>
+        </div>
+    
+        <div class="footer">
+            <button class="btn" id="gps-log" onclick="DownloadModuleLog('GPS')">📤 Download GPS Log</button>
+        </div>
+
+    </div>
+    
+
     <div class="plot-bmp">14</div>
     <div class="plot-gy">15</div>
+
+    <div class="foot">
+        <div class="foot-left">
+            <div class="title">Status</div>
+            <div class="launch">
+                Launch : <span id="launch">🔴</span>
+            </div>
+
+            <div class="flight">
+                In Flight : <span id="flight">🔴</span>
+            </div>
+
+            <div class="deploy">
+                Deployment : <span id="deploy">🔴</span>
+            </div>
+
+            <div class="land">
+                Landed : <span id="land">🔴</span>
+            </div>
+        </div>
+
+        <div class="foot-center">
+            <span>Copyright @ Sky's Rift</span>
+        </div>
+        
+        <div class="foot-right">
+            <button class="btn" id="log" onclick="Download()">📤 Download Log</button>
+        </div>
+    </div>
+
 </div>
     
 
 </body>
 <script src="app.js"></script>
 <script>main();</script>
+<script>Clock();</script>
 </html>
