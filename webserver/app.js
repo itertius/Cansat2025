@@ -185,6 +185,9 @@ function Runtime() {
         run++;
     }, 1000)
 }
+// function Runtime(time) {
+//     document.getElementById('runtime').textContent = time;
+// }
 // ----- //
 
 // Log function //
@@ -245,7 +248,6 @@ function Log(dataArr) {
     logData.push(line);
 }
 
-
 // ----- //
 
 // Download funcion //
@@ -291,12 +293,47 @@ function DownloadModuleLog(filter) {
 }
 // ----- //
 
+// WebSockets Protocol //
+let socket = null;
+function setupWebSocket() {
+    socket = new WebSocket('ws://localhost:8080'); // ws://your_esp32_ip.8080
+    socket.onopen = function() {
+        console.log('WebSocket connection established');
+    };
+    socket.onmessage = function(event) {
+        const msg = JSON.parse(event.data);
+        const cmd = msg[0];
+        const time = msg[1];
 
-async function main() {
+        Runtime(time);
+        Log(msg[2]);
+
+        switch (cmd) {
+            case 0:
+                updateModuleData(data[2]);
+                break;
+            case 1:
+                updateStatus(data[2]);
+                break;
+            default:
+                console.error("Unknown Data Type");
+        }
+    };
+    socket.onerror = function(error) {
+        console.error('WebSocket error:', error);
+    }
+
+    socket.onclose = function() {
+        console.log('WebSocket connection closed');
+    };
+}
+
+// Main function //
+function main() {
     // Create Data Stream
-    console.log("Data Stream Tester");
-    dataStreamTester();
-    console.log(dataStream);
+    // console.log("Data Stream Tester");
+    // dataStreamTester();
+    // console.log(dataStream);
 
     // Initialize map with default coordinates
     if (!mapInit) {
@@ -309,40 +346,36 @@ async function main() {
     }
     console.log("Map Initialized");
 
-    Runtime();
-    
-    // Data Stream Tester
-    for (let i = 0; i < dataStream.length; i++) {
-        const type = dataStream[i][0];
-        const data = dataStream[i][1];
-        Log(dataStream[i]);
-        switch (type) {
-            case 0: // Module Data 
-                updateModuleData(data);
-                break;
-            case 1: // Status
-                updateStatus(data);
-                break;
-            default:
-                console.error("Unknown Data Type");
-        }
-        await new Promise(resolve => setTimeout(resolve, 5000)); // delay for 5 s
-    }
-    // ----- //
+    Clock();
 
+    setupWebSocket();
+
+    // Data Stream Tester
+    // for (let i = 0; i < dataStream.length; i++) {
+    //     const type = dataStream[i][0];
+    //     // const Ctime = dataStream[i][1];
+    //     const data = dataStream[i][1];
+    //     // Runtime(Ctime);
+    //     Log(dataStream[i]);
+    //     switch (type) {
+    //         case 0: // Module Data 
+    //             updateModuleData(data);
+    //             break;
+    //         case 1: // Status
+    //             updateStatus(data);
+    //             break;
+    //         default:
+    //             console.error("Unknown Data Type");
+    //     }
+    //     await new Promise(resolve => setTimeout(resolve, 5000)); // delay for 5 s
+    // }
+    // ----- //
 }
 // ----- //
-
-
-
-
-
-
 
 // Data Stream Tester //
 // Author: iterrius
 // Description: This function is used to test the data stream by generating random data for each type of sensor.
-
 function dataStreamTester() {
     for (let i = 0; i < 100; i++) {
         const type = Math.floor(Math.random() * 4); // 0 to 3
@@ -399,5 +432,4 @@ function dataStreamTester() {
         }
     }
 }
-
 // ----- //
