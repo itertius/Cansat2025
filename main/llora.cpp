@@ -1,6 +1,6 @@
 #include "llora.h"
 
-void initLoRa(long Fq) {
+void initLoRa(long Fq = 935E6) {
   if (!LoRa.begin(Fq)) {
     Serial.println("LoRa Not Found!!!");
   }
