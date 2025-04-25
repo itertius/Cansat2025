@@ -1,4 +1,4 @@
-# Cansat 2025 Flight Software - Sky's Rift Team
+# Flight Software - Sky's Rift Team
 
 A comprehensive Flight Software System for Cansat using ESP32, featuring sensor integration, data collection, and deployment control. The system includes MPU6050 accelerometer for launch detection, BMP280 for environmental monitoring, GPS for position tracking, and LoRa for wireless communication.
 
