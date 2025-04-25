@@ -1,4 +1,4 @@
-# Cansat 2025 - Sky's Rift Team
+# Module Testing Software - Sky's Rift Team
 
 A specialized Module Testing Software System for Cansat using ESP32/Arduino Nano, designed to ensure reliable testing and validation of various Cansat components. The system implements comprehensive testing procedures with safety features and detailed logging capabilities.
 
