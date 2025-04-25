@@ -1,4 +1,4 @@
-# Cansat 2025 Ground Station - Sky's Rift Team
+# Ground Station Software - Sky's Rift Team
 
 A comprehensive Ground Station Software System for Cansat using ESP32, featuring real-time telemetry data visualization, LoRa communication, and a modern web interface. The system implements a robust ground station solution with features including real-time data monitoring, data logging, and a responsive web dashboard.
 
