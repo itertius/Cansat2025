@@ -19,7 +19,7 @@ This Flight Software System implements:
 
 ## Hardware Requirements
 
-- ESP32
+- ESP32 Development Board
 - MPU6050 IMU Sensor
 - BMP280 Pressure/Temperature Sensor
 - GPS Module
