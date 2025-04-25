@@ -40,7 +40,7 @@ This project implements a deployment system that:
 
 3. Clone this repository:
 ```bash
-git clone https://github.com/yourusername/Cansat2025.git
+git clone https://github.com/itertius/Cansat2025.git
 ```
 
 4. Open `main/main.ino` in Arduino IDE
@@ -92,8 +92,14 @@ Key parameters in the code that can be adjusted:
 
 ## Contributing
 
-Feel free to submit issues and enhancement requests!
+This project is licensed under GPL-3.0. Any contributions must be made under the same license terms. By contributing, you agree that your contributions will be licensed under the GPL-3.0 license.
+
+## Author
+
+- **Itertius** - [Instagram](https://www.instagram.com/iterrius_te/)
 
 ## License
 
-[Add your license here]
+This project is licensed under the GNU General Public License v3.0 (GPL-3.0) - see the [LICENSE](LICENSE) file for details.
+
+GPL-3.0 is a copyleft license that requires anyone who distributes your code or a derivative work to make the source available under the same terms. This license also provides a warranty of title.
