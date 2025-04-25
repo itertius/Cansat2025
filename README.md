@@ -54,7 +54,7 @@ A modern ground station system featuring real-time telemetry visualization and L
 - WebSocket for live updates
 - Data logging capabilities
 
-### 4. Module Testing Software (testing branch)
+### 4. Module Testing Software (test branch)
 A comprehensive testing system for validating Cansat components.
 
 **Key Features:**
