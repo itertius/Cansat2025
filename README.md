@@ -128,7 +128,7 @@ This project is licensed under GPL-3.0. Any contributions must be made under the
 
 ## Author
 
-- **Itertius** - [Instagram](https://www.instagram.com/iterrius_te/)
+- **iterrius** - [Instagram](https://www.instagram.com/iterrius_te/)
 
 ## License
 
