@@ -1,6 +1,10 @@
-# Cansat2025
+# Cansat 2025 - Sky's Rift Team
 
 A deployment system for Cansat using ESP32/Arduino Nano with MPU6050 accelerometer for launch detection and servo-controlled deployment mechanism.
+
+## About
+
+This project is developed by **Sky's Rift** team for the Thailand CANSAT - ROCKET Competition 2025. The system is designed to ensure reliable deployment of the Cansat payload during the competition.
 
 ## Project Overview
 
