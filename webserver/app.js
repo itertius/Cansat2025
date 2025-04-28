@@ -86,6 +86,8 @@ function updateModuleData(data) {
             document.getElementById("temp").innerHTML = data[1];
             document.getElementById("press").innerHTML = data[2];
             document.getElementById("bmp-alt").innerHTML = data[3];
+
+            updateModuleChart(type, data[1], data[2], data[3]);
             break
         case 1: // GY
             // GY == 1 : ["1" , "ax" , "ay" , "az" , "gx" , "gy" , "gz"]
@@ -102,6 +104,7 @@ function updateModuleData(data) {
             document.getElementById("gy").innerHTML = data[5];
             document.getElementById("gz").innerHTML = data[6];
 
+            updateModuleChart(type, data[1], data[2], data[3], data[4], data[5], data[6]);
             break;
         case 2: // GPS
             // GPS == 2 : ["2" , "lat" , "lon" , "alt"]
@@ -114,6 +117,8 @@ function updateModuleData(data) {
             document.getElementById("lon").innerHTML = data[2];
             document.getElementById("gps-alt").innerHTML = data[3];
             updateMap(data[1], data[2]);
+
+            updateGPSChart(data[1], data[2], data[3]);
             break;
         default:
             console.error("Unknown Module Type");
@@ -158,6 +163,330 @@ function updateStatus(data) {
 }
 // ----- //
 
+// Module Data Plot function //
+const mtx = document.getElementById("module-chart").getContext("2d");
+const moduleChart = new Chart(mtx, {
+    type: "line",
+    data: {
+        labels: [],
+        datasets: [
+            // BMP280 Data
+            {
+                label: "Temperature (°C)",
+                data: [],
+                borderColor: 'rgb(255, 99, 132)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                tension: 0.1,
+                yAxisID: 'y'
+            },
+            {
+                label: "Pressure (hPa)",
+                data: [],
+                borderColor: 'rgb(54, 162, 235)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                tension: 0.1,
+                yAxisID: 'y1'
+            },
+            {
+                label: "BMP Altitude (m)",
+                data: [],
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1,
+                yAxisID: 'y2'
+            },
+            // GY-521 Acceleration Data
+            {
+                label: "Acceleration X (g)",
+                data: [],
+                borderColor: 'rgb(255, 159, 64)',
+                backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                tension: 0.1,
+                yAxisID: 'y3'
+            },
+            {
+                label: "Acceleration Y (g)",
+                data: [],
+                borderColor: 'rgb(153, 102, 255)',
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                tension: 0.1,
+                yAxisID: 'y3'
+            },
+            {
+                label: "Acceleration Z (g)",
+                data: [],
+                borderColor: 'rgb(255, 159, 243)',
+                backgroundColor: 'rgba(255, 159, 243, 0.2)',
+                tension: 0.1,
+                yAxisID: 'y3'
+            },
+            // GY-521 Gyro Data
+            {
+                label: "Gyro X (°/s)",
+                data: [],
+                borderColor: 'rgb(255, 159, 64)',
+                backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                tension: 0.1,
+                yAxisID: 'y4',
+                borderDash: [5, 5]
+            },
+            {
+                label: "Gyro Y (°/s)",
+                data: [],
+                borderColor: 'rgb(153, 102, 255)',
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                tension: 0.1,
+                yAxisID: 'y4',
+                borderDash: [5, 5]
+            },
+            {
+                label: "Gyro Z (°/s)",
+                data: [],
+                borderColor: 'rgb(255, 159, 243)',
+                backgroundColor: 'rgba(255, 159, 243, 0.2)',
+                tension: 0.1,
+                yAxisID: 'y4',
+                borderDash: [5, 5]
+            }
+        ]
+    },
+    options: {
+        animation: false,
+        responsive: true,
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
+        scales: {
+            x: {
+                type: 'time',
+                time: {
+                    unit: 'second',
+                    displayFormats: {
+                        second: 'HH:mm:ss'
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Time'
+                }
+            },
+            y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                title: {
+                    display: true,
+                    text: 'Temperature (°C)'
+                }
+            },
+            y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                title: {
+                    display: true,
+                    text: 'Pressure (hPa)'
+                },
+                grid: {
+                    drawOnChartArea: false
+                }
+            },
+            y2: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                title: {
+                    display: true,
+                    text: 'Altitude (m)'
+                },
+                grid: {
+                    drawOnChartArea: false
+                }
+            },
+            y3: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                title: {
+                    display: true,
+                    text: 'Acceleration (g)'
+                },
+                grid: {
+                    drawOnChartArea: false
+                }
+            },
+            y4: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                title: {
+                    display: true,
+                    text: 'Angular Velocity (°/s)'
+                },
+                grid: {
+                    drawOnChartArea: false
+                }
+            }
+        }
+    }
+});
+// ----- //
+
+// Module Data Update Function //
+function updateModuleChart(type, temp, press, alt, ax, ay, az, gx, gy, gz) {
+    const now = new Date();
+    
+    // Add new data points
+    moduleChart.data.labels.push(now);
+    
+    // Push data based on sensor type
+    switch (type) {
+        case 0: // BMP280 data
+            dataStream.push({
+                time: now,
+                temp: parseFloat(temp),
+                press: parseFloat(press), 
+                alt: parseFloat(alt)
+            });
+            // Update BMP280 chart data
+            moduleChart.data.datasets[0].data.push({x: now, y: parseFloat(temp)}); // Temperature
+            moduleChart.data.datasets[1].data.push({x: now, y: parseFloat(press)}); // Pressure
+            moduleChart.data.datasets[2].data.push({x: now, y: parseFloat(alt)}); // Altitude
+            break;
+            
+        case 1: // GY-521 data
+            dataStream.push({
+                time: now,
+                ax: parseFloat(ax),
+                ay: parseFloat(ay),
+                az: parseFloat(az),
+                gx: parseFloat(gx),
+                gy: parseFloat(gy),
+                gz: parseFloat(gz)
+            });
+            // Update GY-521 chart data
+            moduleChart.data.datasets[3].data.push({x: now, y: parseFloat(ax)}); // Accel X
+            moduleChart.data.datasets[4].data.push({x: now, y: parseFloat(ay)}); // Accel Y
+            moduleChart.data.datasets[5].data.push({x: now, y: parseFloat(az)}); // Accel Z
+            moduleChart.data.datasets[6].data.push({x: now, y: parseFloat(gx)}); // Gyro X
+            moduleChart.data.datasets[7].data.push({x: now, y: parseFloat(gy)}); // Gyro Y
+            moduleChart.data.datasets[8].data.push({x: now, y: parseFloat(gz)}); // Gyro Z
+            break;
+    }
+
+    // Keep only last 100 points
+    if (moduleChart.data.labels.length > 100) {
+        moduleChart.data.labels.shift();
+        moduleChart.data.datasets.forEach(dataset => {
+            dataset.data.shift();
+        });
+    }
+
+    moduleChart.update('none'); // Update without animation
+}
+// ----- //
+
+// GPS Plot function //
+const gpx = document.getElementById("gps-chart").getContext("2d");
+const gpsChart = new Chart(gpx, {
+    type: 'scatter',
+    data: {
+        datasets: [
+            {
+                label: "GPS Path",
+                data: [],
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                pointRadius: 5,
+                showLine: true,
+                lineTension: 0.1
+            },
+            {
+                label: "Current Position",
+                data: [],
+                borderColor: 'rgb(255, 99, 132)',
+                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                pointRadius: 8,
+                showLine: false
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                type: 'linear',
+                position: 'bottom',
+                title: {
+                    display: true,
+                    text: 'Longitude'
+                },
+                min: 100.0,
+                max: 101.0
+            },
+            y: {
+                type: 'linear',
+                position: 'left',
+                title: {
+                    display: true,
+                    text: 'Latitude'
+                },
+                min: 13.0,
+                max: 14.0
+            }
+        },
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const data = context.raw;
+                        return [
+                            `Latitude: ${data.y.toFixed(6)}°`,
+                            `Longitude: ${data.x.toFixed(6)}°`,
+                            `Altitude: ${data.altitude?.toFixed(2) || 'N/A'}m`
+                        ];
+                    }
+                }
+            }
+        }
+    }
+});
+// ----- //
+
+// GPS Update Function //
+function updateGPSChart(lat, lng, alt) {
+    const newPoint = {
+        x: parseFloat(lng),
+        y: parseFloat(lat),
+        altitude: parseFloat(alt)
+    };
+
+    // Update path dataset
+    gpsChart.data.datasets[0].data.push(newPoint);
+
+    // Update current position dataset
+    gpsChart.data.datasets[1].data = [newPoint];
+
+    // Keep only last 100 points in the path
+    if (gpsChart.data.datasets[0].data.length > 100) {
+        gpsChart.data.datasets[0].data.shift();
+    }
+
+    // Update chart bounds if needed
+    const xScale = gpsChart.scales.x;
+    const yScale = gpsChart.scales.y;
+    
+    if (newPoint.x < xScale.min) xScale.min = newPoint.x - 0.1;
+    if (newPoint.x > xScale.max) xScale.max = newPoint.x + 0.1;
+    if (newPoint.y < yScale.min) yScale.min = newPoint.y - 0.1;
+    if (newPoint.y > yScale.max) yScale.max = newPoint.y + 0.1;
+
+    gpsChart.update('none');
+}
+// ----- //
+
 // Clock function //
 function Clock() {
     setInterval(() => {
@@ -174,7 +503,7 @@ function Clock() {
 
       document.getElementById('time').textContent = formatted;
     }, 1000);
-  }
+}
 // ----- //
 
 // Runtime function //
@@ -247,7 +576,6 @@ function Log(dataArr) {
 
     logData.push(line);
 }
-
 // ----- //
 
 // Download funcion //
@@ -295,6 +623,7 @@ function DownloadModuleLog(filter) {
 
 // WebSockets Protocol //
 let socket = null;
+
 function setupWebSocket() {
     socket = new WebSocket('ws://localhost:8080'); // ws://your_esp32_ip.8080
     socket.onopen = function() {

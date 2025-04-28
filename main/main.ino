@@ -15,8 +15,8 @@
 
 // variable
 String payload = "";
-const char* ssid = "Jirayako_5GHz_EXT";
-const char* password = "0917755971";
+const char* ssid = "CAT yamalah wifi";
+const char* password = "pppb1346";
 long Fq = 935E6;
 unsigned long previous = 0;
 unsigned long interval = 500;
