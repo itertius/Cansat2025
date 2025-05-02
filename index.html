@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="https://i.ibb.co/FkQXT9gr/Sky-s-Rift-logo.png">
+    <title>Sky's Rift Simulation</title>
+</head>
+<body>
+    <div class="controls">
+        <div class="control-group">
+            <h3>Flight Status</h3>
+            <div id="status">Loading...</div>
+        </div>
+        <div class="control-group">
+            <h3>BMP280 Data</h3>
+            <div class="sensor-data">
+                <div>Temperature: <span id="temp">--</span> °C</div>
+                <div>Pressure: <span id="press">--</span> hPa</div>
+                <div>Altitude: <span id="alt">--</span> m</div>
+            </div>
+        </div>
+        <div class="control-group">
+            <h3>GY-521 Data</h3>
+            <div class="sensor-data">
+                <div>Acceleration X: <span id="ax">--</span> g</div>
+                <div>Acceleration Y: <span id="ay">--</span> g</div>
+                <div>Acceleration Z: <span id="az">--</span> g</div>
+                <div>Gyro X: <span id="gx">--</span> °/s</div>
+                <div>Gyro Y: <span id="gy">--</span> °/s</div>
+                <div>Gyro Z: <span id="gz">--</span> °/s</div>
+            </div>
+        </div>
+        <div class="control-group">
+            <h3>GPS Data</h3>
+            <div class="sensor-data">
+                <div>Latitude: <span id="lat">--</span> °</div>
+                <div>Longitude: <span id="lng">--</span> °</div>
+                <div>Altitude: <span id="gpsalt">--</span> m</div>
+            </div>
+        </div>
+    </div>
+    <canvas id="cansat"></canvas>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="app.js"></script>
+</html>
