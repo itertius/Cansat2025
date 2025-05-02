@@ -1,15 +1,15 @@
 #include <Wire.h>
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
-#include <ESP32Servo.h> // Use ESP32Servo library 
+#include <Servo.h>
 
 Adafruit_MPU6050 mpu;
 Servo deployServo;
-int servoPin = 2; // PWM pin connected to the servo signal wire
+int servoPin = 9; // PWM pin connected to the servo signal wire
 
 // Constants
 const float Launch_threshold = -9.0;  // G-force threshold from Z-axis
-const float Eject_threshold = 8.0;    // sqrt(x^2 + y^2) | 54 degree
+const float Eject_threshold = 8.5;    // sqrt(x^2 + y^2)
 const int emergency_time = 10000;     // milliseconds
 const int normal_eject_delay = 2000;  // milliseconds
 const int window_size = 10;           // Window size for moving average filter
@@ -51,16 +51,17 @@ void Check_module() {
 }
 
 void E_Eject() {
-  Serial.println("** SAFETY-EJECTING **");
-  deployServo.write(0);
-  delay(500);
-  deployServo.write(180);
-  delay(500);
+    Serial.println("** SAFETY-EJECTING **");
+    deployServo.write(0);
+    delay(500);
+    deployServo.write(180);
+    delay(500);
 }
+
 
 void setup() {
   Serial.begin(115200);
-  Wire.begin(21, 22);
+  Wire.begin();
   deployServo.attach(servoPin);  // Attach the servo to the defined pin
   Normalize_servo();
   Check_module();
@@ -115,7 +116,7 @@ void loop() {
     }
 
     // Launch Phase
-    if (Launch_state) {   
+    if (Launch_state) {
       Serial.print("Time: ");
       Serial.print(current_time / 1000.0, 2);
       Serial.print("s, a_xandy: ");
@@ -129,15 +130,15 @@ void loop() {
         }
       }
 
-      if (current_time - start_time > emergency_time) {
-        Emergency_eject = true;
-        Eject();
-        Serial.print("Time: ");
-        Serial.print(current_time / 1000.0, 2);
-        Serial.println("s - Emergency Eject");
-        // while (1); // Stop further processing
-      }
-      else if ((a_xandy >= Eject_threshold || avg_az < -9) && current_time - start_time > normal_eject_delay) {
+      // if (current_time - start_time > emergency_time) {
+      //   Emergency_eject = true;
+      //   Eject();
+      //   Serial.print("Time: ");
+      //   Serial.print(current_time / 1000.0, 2);
+      //   Serial.println("s - Emergency Eject");
+      //   // while (1); // Stop further processing
+      // }
+      if ((a_xandy >= Eject_threshold || avg_az < -9) && current_time - start_time > normal_eject_delay) {
         Normal_eject = true;
         Eject();
         Serial.print("Time: ");
@@ -146,11 +147,11 @@ void loop() {
         // while (1); // Stop further processing
       }
     } else {
-      Serial.print("ESP - ");
+      Serial.print("NANO - ");
       Serial.print("Time: ");
       Serial.print(current_time / 1000.0, 2);
       Serial.print("s - Waiting for launch...");
-      Serial.print(" | Time: ");
+      Serial.print("| Time: ");
       Serial.print(current_time / 1000.0, 2);
       Serial.print("s, a_xandy: ");
       Serial.print(a_xandy);
@@ -159,3 +160,4 @@ void loop() {
     }
   }
 }
+ 

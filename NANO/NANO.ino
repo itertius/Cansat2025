@@ -5,11 +5,11 @@
 
 Adafruit_MPU6050 mpu;
 Servo deployServo;
-int servoPin = 3; // PWM pin connected to the servo signal wire
+int servoPin = 9; // PWM pin connected to the servo signal wire
 
 // Constants
 const float Launch_threshold = -9.0;  // G-force threshold from Z-axis
-const float Eject_threshold = 8.0;    // sqrt(x^2 + y^2)
+const float Eject_threshold = 8.0;    // sqrt(x^2 + y^2) | 54 degree
 const int emergency_time = 10000;     // milliseconds
 const int normal_eject_delay = 2000;  // milliseconds
 const int window_size = 10;           // Window size for moving average filter
@@ -51,13 +51,12 @@ void Check_module() {
 }
 
 void E_Eject() {
-    Serial.println("** SAFETY-EJECTING **");
-    deployServo.write(0);
-    delay(500);
-    deployServo.write(180);
-    delay(500);
+  Serial.println("** SAFETY-EJECTING **");
+  deployServo.write(0);
+  delay(500);
+  deployServo.write(180);
+  delay(500);
 }
-
 
 void setup() {
   Serial.begin(115200);
@@ -124,11 +123,12 @@ void loop() {
       Serial.print("g, avg_az: ");
       Serial.println(avg_az);
 
-      if (Normal_eject || Emergency_eject) {
-        while (1) {
-          E_Eject();
-        }
-      }
+      // if (Normal_eject || Emergency_eject) {
+      //   // while (1) {
+      //     E_Eject();
+      //   // }
+      //   while(1);
+      // }
 
       if (current_time - start_time > emergency_time) {
         Emergency_eject = true;
@@ -136,7 +136,7 @@ void loop() {
         Serial.print("Time: ");
         Serial.print(current_time / 1000.0, 2);
         Serial.println("s - Emergency Eject");
-        // while (1); // Stop further processing
+        while (1); // Stop further processing
       }
       else if ((a_xandy >= Eject_threshold || avg_az < -9) && current_time - start_time > normal_eject_delay) {
         Normal_eject = true;
@@ -144,12 +144,19 @@ void loop() {
         Serial.print("Time: ");
         Serial.print(current_time / 1000.0, 2);
         Serial.println("s - Normal Eject");
-        // while (1); // Stop further processing
+        while (1); // Stop further processing
       }
     } else {
+      Serial.print("NANO - ");
       Serial.print("Time: ");
       Serial.print(current_time / 1000.0, 2);
-      Serial.println("s - Waiting for launch...");
+      Serial.print("s - Waiting for launch...");
+      Serial.print("| Time: ");
+      Serial.print(current_time / 1000.0, 2);
+      Serial.print("s, a_xandy: ");
+      Serial.print(a_xandy);
+      Serial.print("g, avg_az: ");
+      Serial.println(avg_az);
     }
   }
 }
