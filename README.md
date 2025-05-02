@@ -1,6 +1,6 @@
 # Cansat 2025 - Sky's Rift Team
 
-A comprehensive Cansat system developed for the Thailand CANSAT - ROCKET Competition 2025, featuring deployment software, flight software, ground station software, and module testing capabilities.
+A comprehensive Cansat system developed for the Thailand CANSAT - ROCKET Competition 2025, featuring deployment software, flight software, ground station software, simulation, and module testing capabilities.
 
 ## About
 
@@ -15,6 +15,7 @@ This repository is organized into multiple branches, each containing a specific 
 - `Deployment` - Deployment Software implementation
 - `FSW` - Flight Software implementation
 - `Ground` - Ground Station Software and web server
+- `Simulation` - Flight Simulation Software
 - `test` - Module Testing Software
 
 To access different components, switch to the respective branch:
@@ -54,7 +55,17 @@ A modern ground station system featuring real-time telemetry visualization and L
 - WebSocket for live updates
 - Data logging capabilities
 
-### 4. Module Testing Software (test branch)
+### 4. Flight Simulation Software (Simulation branch)
+A 3D visualization and simulation tool for the Thailand CANSAT - ROCKET Competition 2025.
+
+**Key Features:**
+- Real-time sensor data visualization
+- Flight path simulation
+- 3D visualization of Cansat
+- Environmental condition simulation
+- Performance analysis tools
+
+### 5. Module Testing Software (test branch)
 A comprehensive testing system for validating Cansat components.
 
 **Key Features:**
@@ -87,6 +98,10 @@ A comprehensive testing system for validating Cansat components.
   - LoRa Module
   - Computer for running ground station software
 
+- **Simulation:**
+  - Computer with 3D graphics capability
+  - Modern web browser
+
 ## Software Requirements
 
 ### Common Requirements
@@ -103,7 +118,7 @@ A comprehensive testing system for validating Cansat components.
   - Servo.h
 
 - **Flight System:**
-  - Adafruit_BMP280/h
+  - Adafruit_BMP280.h
   - Adafruit_MPU6050.h
   - TinyGPSPlus.h
   - LoRa.h
@@ -112,6 +127,11 @@ A comprehensive testing system for validating Cansat components.
   - Node.js (v14 or higher)
   - Express
   - Socket.io
+
+- **Simulation:**
+  - Three.js
+  - WebGL compatible browser
+  - Node.js (for local development)
 
 ## Installation
 
@@ -127,7 +147,7 @@ git checkout <branch-name>
 
 3. Install required software:
    - Arduino IDE or PlatformIO
-   - Node.js (for ground station)
+   - Node.js (for ground station and simulation)
    - Required libraries (see individual component documentation)
 
 ## Contributing
