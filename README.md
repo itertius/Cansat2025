@@ -1,145 +1,112 @@
-# Cansat 2025 - Sky's Rift Team
+# Flight Simulation Software - Sky's Rift Team
 
-A comprehensive Cansat system developed for the Thailand CANSAT - ROCKET Competition 2025, featuring deployment software, flight software, ground station software, and module testing capabilities.
+A 3D visualization and simulation tool for the Thailand CANSAT - ROCKET Competition 2025, featuring real-time sensor data visualization and flight path simulation.
 
 ## About
 
-This repository includes Ground Station software, Deployment system, and Flight software for the Thailand CANSAT - ROCKET Competition 2025. The system consists of multiple integrated components working together to ensure reliable and safe operation of the Cansat payload during the competition.
+This project provides a web-based 3D simulation environment for visualizing Cansat flight data, including sensor readings, flight path, and real-time status updates. The simulation helps in analyzing and understanding the behavior of the Cansat during its mission.
 
-## Repository Structure
+## Features
 
-This repository is organized into multiple branches, each containing a specific component of the Cansat system:
+- **3D Visualization**
+  - Real-time 3D rendering of Cansat flight path
+  - Terrain visualization
+  - Dynamic camera controls
+  - Smooth animations
 
-### Branches
-- `master` - Main branch containing project documentation
-- `Deployment` - Deployment Software implementation
-- `FSW` - Flight Software implementation
-- `Ground` - Ground Station Software and web server
-- `test` - Module Testing Software
+- **Sensor Data Display**
+  - BMP280 Sensor Data
+    - Temperature
+    - Pressure
+    - Altitude
+  - GY-521 IMU Data
+    - 3-axis Acceleration
+    - 3-axis Gyroscope
+  - GPS Data
+    - Latitude
+    - Longitude
+    - Altitude
 
-To access different components, switch to the respective branch:
-```bash
-git checkout <branch-name>
+- **Data Processing**
+  - CSV data import and processing
+  - Real-time data interpolation
+  - Flight status tracking
+  - Time-based data visualization
+
+## Project Structure
+
+```
+.
+├── app.js              # Main application logic and 3D visualization
+├── index.html          # Web interface and layout
+├── styles.css          # Styling for the web interface
+├── generate.py         # Data generation script
+├── log.csv             # Sample flight data
+└── README.md           # Project documentation
 ```
 
-## Project Components
+## Technologies Used
 
-### 1. Deployment Software (Deployment branch)
-A specialized system using ESP32/Arduino Nano with MPU6050 accelerometer for launch detection and servo-controlled deployment mechanism.
+- **Frontend**
+  - Three.js for 3D rendering
+  - HTML5 and CSS3
+  - JavaScript (ES6+)
 
-**Key Features:**
-- Launch detection using MPU6050
-- Normal and emergency ejection mechanisms
-- Safety features and timing mechanisms
-- Moving average filter for stable readings
-
-### 2. Flight Software (FSW branch)
-A comprehensive system using ESP32 for sensor integration, data collection, and deployment control.
-
-**Key Features:**
-- Real-time sensor data collection
-- Environmental monitoring (BMP280)
-- Motion tracking (MPU6050)
-- GPS position tracking
-- LoRa-based wireless telemetry
-- Timed data sampling and transmission
-
-### 3. Ground Station Software (Ground branch)
-A modern ground station system featuring real-time telemetry visualization and LoRa communication.
-
-**Key Features:**
-- Real-time data visualization
-- Web-based dashboard
-- LoRa communication
-- WebSocket for live updates
-- Data logging capabilities
-
-### 4. Module Testing Software (test branch)
-A comprehensive testing system for validating Cansat components.
-
-**Key Features:**
-- Component validation
-- Performance testing
-- Safety checks
-- Integration testing
-- Detailed logging
-
-## Hardware Requirements
-
-### Common Requirements
-- ESP32 Development Board
-- Jumper Wires
-- Breadboard (optional)
-- USB Cable for programming
-
-### Specific Requirements
-- **Deployment System:**
-  - MPU6050 Accelerometer
-  - Servo Motor
-
-- **Flight System:**
-  - MPU6050 IMU Sensor
-  - BMP280 Pressure/Temperature Sensor
-  - GPS Module
-  - LoRa Module
-
-- **Ground Station:**
-  - LoRa Module
-  - Computer for running ground station software
-
-## Software Requirements
-
-### Common Requirements
-- Arduino IDE or PlatformIO
-- Required Libraries:
-  - Wire.h (built-in)
-  - SPI.h (built-in)
-  - Serial.h (built-in)
-
-### Specific Requirements
-- **Deployment System:**
-  - Adafruit_MPU6050.h
-  - Adafruit_Sensor.h
-  - Servo.h
-
-- **Flight System:**
-  - Adafruit_BMP280/h
-  - Adafruit_MPU6050.h
-  - TinyGPSPlus.h
-  - LoRa.h
-
-- **Ground Station:**
-  - Node.js (v14 or higher)
-  - Express
-  - Socket.io
+- **Data Processing**
+  - Python for data generation
+  - CSV data format
 
 ## Installation
 
-1. Clone this repository:
+1. Clone the repository:
 ```bash
-git clone https://github.com/itertius/Cansat2025.git
+git clone -b Simulation https://github.com/itertius/Cansat2025.git
 ```
 
-2. Switch to the desired branch:
-```bash
-git checkout <branch-name>
-```
+2. Install dependencies:
+   - No additional dependencies required for the web interface
+   - For data generation, ensure Python is installed
 
-3. Install required software:
-   - Arduino IDE or PlatformIO
-   - Node.js (for ground station)
-   - Required libraries (see individual component documentation)
+3. Run the simulation:
+   - Open `index.html` in a modern web browser
+   - For data generation, run `python generate.py`
+
+## Usage
+
+1. Open the web interface in your browser
+2. The simulation will automatically load and display:
+   - 3D visualization of the Cansat
+   - Real-time sensor data
+   - Flight path
+   - Current status
+
+3. Interact with the visualization:
+   - Use mouse to rotate the view
+   - Scroll to zoom in/out
+   - Pan to move the camera
+
+## Data Format
+
+The simulation accepts CSV data with the following format:
+- Time-based sensor readings
+- GPS coordinates
+- IMU data
+- Environmental data
 
 ## Contributing
 
 This project is licensed under GPL-3.0. Any contributions must be made under the same license terms. By contributing, you agree that your contributions will be licensed under the GPL-3.0 license.
 
-## Author
-
-- **iterrius** - [Instagram](https://www.instagram.com/iterrius_te/)
-
 ## License
 
 This project is licensed under the GNU General Public License v3.0 (GPL-3.0) - see the [LICENSE](LICENSE) file for details.
 
-GPL-3.0 is a copyleft license that requires anyone who distributes your code or a derivative work to make the source available under the same terms. This license also provides a warranty of title.
+## Author
+
+- **iterrius** - [Instagram](https://www.instagram.com/iterrius_te/)
+
+## Acknowledgments
+
+- Three.js community for the excellent 3D visualization library
+- The Cansat competition organizers for providing the platform
+- All contributors and supporters of the project
