@@ -9,7 +9,7 @@ int servoPin = 9; // PWM pin connected to the servo signal wire
 
 // Constants
 const float Launch_threshold = -9.0;  // G-force threshold from Z-axis
-const float Eject_threshold = 8.0;    // sqrt(x^2 + y^2) | 54 degree
+const float Eject_threshold = 7.83;    // sqrt(x^2 + y^2) | 8.0 = 54.6 degrees || 7.83 = 53 degrees
 const int emergency_time = 10000;     // milliseconds
 const int normal_eject_delay = 2000;  // milliseconds
 const int window_size = 10;           // Window size for moving average filter
@@ -129,22 +129,26 @@ void loop() {
       //   // }
       //   while(1);
       // }
-
-      if (current_time - start_time > emergency_time) {
-        Emergency_eject = true;
-        Eject();
-        Serial.print("Time: ");
-        Serial.print(current_time / 1000.0, 2);
-        Serial.println("s - Emergency Eject");
-        while (1); // Stop further processing
+      if (Normal_eject || Emergency_eject) {
+        E_Eject();
       }
-      else if ((a_xandy >= Eject_threshold || avg_az < -9) && current_time - start_time > normal_eject_delay) {
-        Normal_eject = true;
-        Eject();
-        Serial.print("Time: ");
-        Serial.print(current_time / 1000.0, 2);
-        Serial.println("s - Normal Eject");
-        while (1); // Stop further processing
+      else {
+        if (current_time - start_time > emergency_time) {
+          Emergency_eject = true;
+          Eject();
+          Serial.print("Time: ");
+          Serial.print(current_time / 1000.0, 2);
+          Serial.println("s - Emergency Eject");
+          // while (1); // Stop further processing
+        }
+        else if ((a_xandy >= Eject_threshold || avg_az < -9) && current_time - start_time > normal_eject_delay) {
+          Normal_eject = true;
+          Eject();
+          Serial.print("Time: ");
+          Serial.print(current_time / 1000.0, 2);
+          Serial.println("s - Normal Eject");
+          // while (1); // Stop further processing
+        }
       }
     } else {
       Serial.print("NANO - ");
