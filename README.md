@@ -42,12 +42,12 @@ This project implements a deployment system that:
      - Adafruit Unified Sensor
      - Servo
 
-3. Clone this repository:
+3. Clone this branch:
 ```bash
-git clone https://github.com/itertius/Cansat2025.git
+git clone -b Deployment https://github.com/itertius/Cansat2025.git
 ```
 
-4. Open `main/main.ino` in Arduino IDE
+4. Select Device and Open `DEVICE/DEVICE.ino` in Arduino IDE
 
 ## Hardware Setup
 
@@ -67,6 +67,7 @@ git clone https://github.com/itertius/Cansat2025.git
 Key parameters in the code that can be adjusted:
 - `Launch_threshold`: G-force threshold for launch detection
 - `Eject_threshold`: Threshold for normal ejection
+- `freefall_threshold` : Threshold for freefall ejection
 - `emergency_time`: Time before emergency ejection
 - `normal_eject_delay`: Delay before normal ejection
 - `window_size`: Size of moving average filter
