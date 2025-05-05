@@ -530,7 +530,7 @@ function Log(dataArr) {
     const data = dataArr[1];
 
     const now = new Date();
-    const utcOffset = 7;
+    const utcOffset = 7;E
     const utc7 = new Date(now.getTime() + utcOffset * 60 * 60 * 1000).toISOString();
 
     let line = "";

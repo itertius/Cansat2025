@@ -54,9 +54,9 @@ This project implements a ground station system that:
      - WebSockets
      - WiFi
 
-3. Clone this repository:
+3. Clone this branch:
 ```bash
-git clone https://github.com/itertius/Cansat2025.git
+git clone -b Ground https://github.com/itertius/Cansat2025.git
 ```
 
 4. Open `main/main.ino` in Arduino IDE
