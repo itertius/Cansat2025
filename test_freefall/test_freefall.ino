@@ -1,15 +1,15 @@
 #include <Wire.h>
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
-#include <Servo.h>
+#include <ESP32Servo.h> // Use ESP32Servo library 
 
 Adafruit_MPU6050 mpu;
 Servo deployServo;
-int servoPin = 9; // PWM pin connected to the servo signal wire
+int servoPin = 2; // PWM pin connected to the servo signal wire
 
 // Constants
 const float Launch_threshold = -9.0;  // G-force threshold from Z-axis
-const float Eject_threshold = 7.83;    // sqrt(x^2 + y^2) | 8.0 = 54.6 degrees || 7.83 = 53 degrees
+const float Eject_threshold = 7.83;   // sqrt(x^2 + y^2) | 8.0 = 54.6 degrees || 7.83 = 53 degrees
 const float freefall_threshold = 2;   // sqrt(ax² + ay² + az²) | < 2 = freefall
 const int emergency_time = 10000;     // milliseconds
 const int normal_eject_delay = 2000;  // milliseconds
@@ -63,7 +63,7 @@ void E_Eject() {
 
 void setup() {
   Serial.begin(115200);
-  Wire.begin();
+  Wire.begin(21, 22);
   deployServo.attach(servoPin);  // Attach the servo to the defined pin
   Normalize_servo();
   Check_module();
@@ -74,7 +74,6 @@ void setup() {
     buffer[i][AY] = 0;
     buffer[i][AZ] = 0;
   }
-
   for (int i=0; i < 3; i++) {
     buffer_a[i][AX] = 0;
     buffer_a[i][AY] = 0;
@@ -140,77 +139,44 @@ void loop() {
     }
 
     // Launch Phase
-    if (Launch_state) {
+    if (Launch_state) {   
       Serial.print("Time: ");
       Serial.print(current_time / 1000.0, 2);
       Serial.print("s, a_xandy: ");
       Serial.print(a_xandy);
-      Serial.print("m/s, avg_az : ");
+      Serial.print("g, avg_az: ");
       Serial.print(avg_az);
-      Serial.print("g, total_a: ");
-      Serial.print(total_a);
-      Serial.println("m/s");
+      Serial.print(" total_a: ");
+      Serial.println(total_a);
 
-      // if (Normal_eject || Emergency_eject) {
-      //   // while (1) {
-      //     E_Eject();
-      //   // }
-      //   while(1);
-      // }
       if (Normal_eject || Emergency_eject) {
-        E_Eject();
-      }
-      else {
-        if (current_time - start_time > emergency_time) {
-          Emergency_eject = true;
-          Eject();
-          Serial.print("Time: ");
-          Serial.print(current_time / 1000.0, 2);
-          Serial.println("s - Emergency Eject");
-          Serial.print("Time: ");
-          Serial.print(current_time / 1000.0, 2);
-          Serial.print("s, a_xandy: ");
-          Serial.print(a_xandy);
-          Serial.print("m/s, avg_az : ");
-          Serial.print(avg_az);
-          Serial.print("g, total_a: ");
-          Serial.print(total_a);
-          Serial.println("m/s");
-          // while (1); // Stop further processing
-        }
-        else if ((a_xandy >= Eject_threshold || avg_az < -9 || total_a < freefall_threshold) && current_time - start_time > normal_eject_delay) {
-          Normal_eject = true;
-          Eject();
-          Serial.print("Time: ");
-          Serial.print(current_time / 1000.0, 2);
-          Serial.print("s - Normal Eject");
-          if (a_xandy >= Eject_threshold) {
-            Serial.println("| >= 53 degree");
-          }
-          else if (avg_az < -9) {
-            Serial.println("| < G-force");
-          }
-          else if (total_a < freefall_threshold) {
-            Serial.println("| freefall");
-          }
-          Serial.print("Time: ");
-          Serial.print(current_time / 1000.0, 2);
-          Serial.print("s, a_xandy: ");
-          Serial.print(a_xandy);
-          Serial.print("m/s, avg_az : ");
-          Serial.print(avg_az);
-          Serial.print("g, total_a: ");
-          Serial.print(total_a);
-          Serial.println("m/s");
-          // while (1); // Stop further processing
+        while (1) {
+          E_Eject();
         }
       }
+
+      if (total_a < freefall_threshold) {
+        Normal_eject = true;
+        Eject();
+        Serial.print("Time: ");
+        Serial.print(current_time / 1000.0, 2);
+        Serial.println("s - Normal Eject");
+        // while (1); // Stop further processing
+      }
+      // else if ((a_xandy >= Eject_threshold || avg_az < -9 || total_a < freefall_threshold) && current_time - start_time > normal_eject_delay) {
+      //   Normal_eject = true;
+      //   Eject();
+      //   Serial.print("Time: ");
+      //   Serial.print(current_time / 1000.0, 2);
+      //   Serial.println("s - Normal Eject");
+      //   // while (1); // Stop further processing
+      // }
     } else {
-      Serial.print("NANO - ");
+      Serial.print("ESP - ");
       Serial.print("Time: ");
       Serial.print(current_time / 1000.0, 2);
       Serial.print("s - Waiting for launch...");
-      Serial.print("| Time: ");
+      Serial.print(" | Time: ");
       Serial.print(current_time / 1000.0, 2);
       Serial.print("s, a_xandy: ");
       Serial.print(a_xandy);

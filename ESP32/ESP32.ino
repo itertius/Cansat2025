@@ -9,7 +9,8 @@ int servoPin = 2; // PWM pin connected to the servo signal wire
 
 // Constants
 const float Launch_threshold = -9.0;  // G-force threshold from Z-axis
-const float Eject_threshold = 7.83;    // sqrt(x^2 + y^2) | 8.0 = 54.6 degrees || 7.83 = 53 degrees
+const float Eject_threshold = 7.83;   // sqrt(x^2 + y^2) | 8.0 = 54.6 degrees || 7.83 = 53 degrees
+const float freefall_threshold = 2;   // sqrt(ax² + ay² + az²) | < 2 = freefall
 const int emergency_time = 10000;     // milliseconds
 const int normal_eject_delay = 2000;  // milliseconds
 const int window_size = 10;           // Window size for moving average filter
@@ -28,6 +29,8 @@ unsigned long start_time = 0;
 
 float buffer[window_size][3]; // Buffer for storing recent X, Y, Z accelerations
 int buffer_index = 0;
+float buffer_a[3][3];
+int buffer_index_a = 0;
 
 void Normalize_servo() {
   deployServo.write(0);  // Set servo to 0 degrees
@@ -71,6 +74,12 @@ void setup() {
     buffer[i][AY] = 0;
     buffer[i][AZ] = 0;
   }
+
+  for (int i=0; i < 3; i++) {
+    buffer_a[i][AX] = 0;
+    buffer_a[i][AY] = 0;
+    buffer_a[i][AZ] = 0;
+  }
 }
 
 void loop() {
@@ -93,6 +102,11 @@ void loop() {
     buffer[buffer_index][AZ] = az;
     buffer_index = (buffer_index + 1) % window_size;
 
+    buffer_a[buffer_index_a][AX] = ax;
+    buffer_a[buffer_index_a][AY] = ay;
+    buffer_a[buffer_index_a][AZ] = az;
+    buffer_index_a = (buffer_index_a + 1) % 3;
+
     // Calculate moving average
     float avg_ax = 0, avg_ay = 0, avg_az = 0;
     for (int i = 0; i < window_size; i++) {
@@ -104,7 +118,18 @@ void loop() {
     avg_ay /= window_size;
     avg_az /= window_size;
 
+    float avg_total_ax = 0, avg_total_ay = 0, avg_total_az = 0;
+    for (int i=0; i < 3; i++) {
+      avg_total_ax +=buffer_a[i][AX];
+      avg_total_ay +=buffer_a[i][AY];
+      avg_total_az +=buffer_a[i][AZ];
+    }
+    avg_total_ax /= 3;
+    avg_total_ay /= 3;
+    avg_total_az /= 3;
+
     float a_xandy = sqrt(avg_ax * avg_ax + avg_ay * avg_ay);
+    float total_a = sqrt(avg_total_ax * avg_total_ax + avg_total_ay * avg_total_ay + avg_total_az * avg_total_az);
     
     if (avg_az <= Launch_threshold && !Launch_state) {
       Launch_state = true;
@@ -120,30 +145,60 @@ void loop() {
       Serial.print(current_time / 1000.0, 2);
       Serial.print("s, a_xandy: ");
       Serial.print(a_xandy);
-      Serial.print("g, avg_az: ");
-      Serial.println(avg_az);
+      Serial.print("m/s, avg_az : ");
+      Serial.print(avg_az);
+      Serial.print("g, total_a: ");
+      Serial.print(total_a);
+      Serial.println("m/s");
 
       if (Normal_eject || Emergency_eject) {
-        while (1) {
-          E_Eject();
-        }
+        E_Eject();
       }
-
+      else {
       if (current_time - start_time > emergency_time) {
         Emergency_eject = true;
         Eject();
         Serial.print("Time: ");
         Serial.print(current_time / 1000.0, 2);
         Serial.println("s - Emergency Eject");
-        // while (1); // Stop further processing
-      }
-      else if ((a_xandy >= Eject_threshold || avg_az < -9) && current_time - start_time > normal_eject_delay) {
-        Normal_eject = true;
-        Eject();
         Serial.print("Time: ");
         Serial.print(current_time / 1000.0, 2);
-        Serial.println("s - Normal Eject");
+        Serial.print("s, a_xandy: ");
+        Serial.print(a_xandy);
+        Serial.print("m/s, avg_az : ");
+        Serial.print(avg_az);
+        Serial.print("g, total_a: ");
+        Serial.print(total_a);
+        Serial.println("m/s");
         // while (1); // Stop further processing
+      }
+      else if ((a_xandy >= Eject_threshold || avg_az < -9 || total_a < freefall_threshold) && current_time - start_time > normal_eject_delay) {
+        Normal_eject = true;
+        Eject();
+        
+        Serial.print("Time: ");
+        Serial.print(current_time / 1000.0, 2);
+        Serial.print("s - Normal Eject");
+        if (a_xandy >= Eject_threshold) {
+          Serial.println("| >= 53 degree");
+        }
+        else if (avg_az < -9) {
+          Serial.println("| < G-force");
+        }
+        else if (total_a < freefall_threshold) {
+          Serial.println("| freefall");
+        }
+        Serial.print("Time: ");
+        Serial.print(current_time / 1000.0, 2);
+        Serial.print("s, a_xandy: ");
+        Serial.print(a_xandy);
+        Serial.print("m/s, avg_az : ");
+        Serial.print(avg_az);
+        Serial.print("g, total_a: ");
+        Serial.print(total_a);
+        Serial.println("m/s");
+        // while (1); // Stop further processing
+      }
       }
     } else {
       Serial.print("ESP - ");
