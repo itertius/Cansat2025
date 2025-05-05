@@ -47,7 +47,7 @@ This project implements a deployment system that:
 git clone -b Deployment https://github.com/itertius/Cansat2025.git
 ```
 
-4. Select Device and Open `DEVICE/DEVICE.ino` in Arduino IDE
+4. Select Device and Open `<board>/<board>.ino` in Arduino IDE
 
 ## Hardware Setup
 
