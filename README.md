@@ -55,9 +55,9 @@ This Flight Software System implements:
    - Search and install:
      - LoRa
 
-3. Clone this repository:
+3. Clone this branch:
 ```bash
-git clone https://github.com/itertius/Cansat2025.git
+git clone -b FSW https://github.com/itertius/Cansat2025.git
 ```
 
 4. Open `main/main.ino` in Arduino IDE
