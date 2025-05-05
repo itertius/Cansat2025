@@ -58,7 +58,7 @@ This project provides a web-based 3D simulation environment for visualizing Cans
 
 ## Installation
 
-1. Clone the repository:
+1. Clone the branch:
 ```bash
 git clone -b Simulation https://github.com/itertius/Cansat2025.git
 ```
