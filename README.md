@@ -46,9 +46,9 @@ This project implements a testing system that:
    - Go to Tools > Manage Libraries
    - Search and install any required libraries
 
-3. Clone this repository:
+3. Clone this branch:
 ```bash
-git clone https://github.com/itertius/Cansat2025.git
+git clone -b test https://github.com/itertius/Cansat2025.git
 ```
 
 4. Open the appropriate test module file in Arduino IDE
