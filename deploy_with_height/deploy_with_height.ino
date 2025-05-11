@@ -1,15 +1,22 @@
 #include <Wire.h>
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
-#include <Servo.h>
+#include <ESP32Servo.h> // Use ESP32Servo library 
+#include <Adafruit_BMP280.h>
 
 Adafruit_MPU6050 mpu;
 Servo deployServo;
-int servoPin = 9; // PWM pin connected to the servo signal wire
+int servoPin = 2; // PWM pin connected to the servo signal wire
+
+Adafruit_BMP280 bmp;
+const int duration = 120;
+float heightArray[duration];
+int bmp_index = 0;
+bool bmp_state = false;
 
 // Constants
 const float Launch_threshold = -9.0;  // G-force threshold from Z-axis
-const float Eject_threshold = 7.83;    // sqrt(x^2 + y^2) | 8.0 = 54.6 degrees || 7.83 = 53 degrees
+const float Eject_threshold = 7.83;   // sqrt(x^2 + y^2) | 8.0 = 54.6 degrees || 7.83 = 53 degrees
 const float freefall_threshold = 2;   // sqrt(ax² + ay² + az²) | < 2 = freefall
 const int emergency_time = 10000;     // milliseconds
 const int normal_eject_delay = 2000;  // milliseconds
@@ -33,13 +40,13 @@ float buffer_a[3][3];
 int buffer_index_a = 0;
 
 void Normalize_servo() {
-  deployServo.write(90);  // Set servo to 0 degrees
+  deployServo.write(0);  // Set servo to 0 degrees
 }
 
 void Eject() {
-  deployServo.write(0);  // Move servo to 180 degrees
+  deployServo.write(180);  // Move servo to 180 degrees
   delay(3000);
-  deployServo.write(90);    // Return servo to 0 degrees
+  deployServo.write(0);    // Return servo to 0 degrees
 }
 
 void Check_module() {
@@ -53,6 +60,17 @@ void Check_module() {
   Serial.println("Found MPU6050");
 }
 
+void Check_bmp() {
+  // BMP
+  if (!bmp.begin()) {
+    Serial.println("Failed to find BMP280 chip");
+    while (1) {
+      delay(10);
+    }
+  }
+  Serial.println("Found BMP280");
+}
+
 void E_Eject() {
   Serial.println("** SAFETY-EJECTING **");
   deployServo.write(0);
@@ -63,10 +81,11 @@ void E_Eject() {
 
 void setup() {
   Serial.begin(115200);
-  Wire.begin();
+  Wire.begin(21, 22);
   deployServo.attach(servoPin);  // Attach the servo to the defined pin
   Normalize_servo();
   Check_module();
+  Check_bmp();
 
   // Initialize buffer with zeros
   for (int i = 0; i < window_size; i++) {
@@ -85,6 +104,10 @@ void setup() {
 void loop() {
   static unsigned long previous_time = 0;
   unsigned long current_time = millis();
+
+  float temperature = bmp.readTemperature();
+  float pressure = bmp.readPressure() / 100.0F;
+  float altitude = bmp.readAltitude(1013.25);
   
   if (current_time - previous_time >= interval) {
     previous_time = current_time;
@@ -140,7 +163,7 @@ void loop() {
     }
 
     // Launch Phase
-    if (Launch_state) {
+    if (Launch_state) {   
       Serial.print("Time: ");
       Serial.print(current_time / 1000.0, 2);
       Serial.print("s, a_xandy: ");
@@ -151,71 +174,80 @@ void loop() {
       Serial.print(total_a);
       Serial.println("m/s");
 
-      // if (Normal_eject || Emergency_eject) {
-      //   // while (1) {
-      //     E_Eject();
-      //   // }
-      //   while(1);
-      // }
       if (Normal_eject || Emergency_eject) {
-        // E_Eject();
+        if (bool_state) {
+          for (int i = 0; i < duration; i++) {
+            Serial.print("Second "); Serial.print(i + 1); Serial.print(": ");
+            Serial.println(heightArray[i]);
+          }
+        }
+        E_Eject();
       }
       else {
-        if (current_time - start_time > emergency_time) {
-          Emergency_eject = true;
-          Eject();
-          Serial.print("Time: ");
-          Serial.print(current_time / 1000.0, 2);
-          Serial.println("s - Emergency Eject");
-          Serial.print("Time: ");
-          Serial.print(current_time / 1000.0, 2);
-          Serial.print("s, a_xandy: ");
-          Serial.print(a_xandy);
-          Serial.print("m/s, avg_az : ");
-          Serial.print(avg_az);
-          Serial.print("g, total_a: ");
-          Serial.print(total_a);
-          Serial.println("m/s");
-          // while (1); // Stop further processing
+      if (current_time - start_time > emergency_time) {
+        Emergency_eject = true;
+        Eject();
+        Serial.print("Time: ");
+        Serial.print(current_time / 1000.0, 2);
+        Serial.println("s - Emergency Eject");
+        Serial.print("Time: ");
+        Serial.print(current_time / 1000.0, 2);
+        Serial.print("s, a_xandy: ");
+        Serial.print(a_xandy);
+        Serial.print("m/s, avg_az : ");
+        Serial.print(avg_az);
+        Serial.print("g, total_a: ");
+        Serial.print(total_a);
+        Serial.println("m/s");
+        // while (1); // Stop further processing
+      }
+      else if ((a_xandy >= Eject_threshold || avg_az < -9 || total_a < freefall_threshold) && current_time - start_time > normal_eject_delay) {
+        Normal_eject = true;
+        Eject();
+        
+        Serial.print("Time: ");
+        Serial.print(current_time / 1000.0, 2);
+        Serial.print("s - Normal Eject");
+        if (a_xandy >= Eject_threshold) {
+          Serial.println("| >= 53 degree");
         }
-        else if ((a_xandy >= Eject_threshold || avg_az < -9 || total_a < freefall_threshold) && current_time - start_time > normal_eject_delay) {
-          Normal_eject = true;
-          Eject();
-          Serial.print("Time: ");
-          Serial.print(current_time / 1000.0, 2);
-          Serial.print("s - Normal Eject");
-          if (a_xandy >= Eject_threshold) {
-            Serial.println("| >= 53 degree");
-          }
-          else if (avg_az < -9) {
-            Serial.println("| < G-force");
-          }
-          else if (total_a < freefall_threshold) {
-            Serial.println("| freefall");
-          }
-          Serial.print("Time: ");
-          Serial.print(current_time / 1000.0, 2);
-          Serial.print("s, a_xandy: ");
-          Serial.print(a_xandy);
-          Serial.print("m/s, avg_az : ");
-          Serial.print(avg_az);
-          Serial.print("g, total_a: ");
-          Serial.print(total_a);
-          Serial.println("m/s");
-          // while (1); // Stop further processing
+        else if (avg_az < -9) {
+          Serial.println("| < G-force");
         }
+        else if (total_a < freefall_threshold) {
+          Serial.println("| freefall");
+        }
+        Serial.print("Time: ");
+        Serial.print(current_time / 1000.0, 2);
+        Serial.print("s, a_xandy: ");
+        Serial.print(a_xandy);
+        Serial.print("m/s, avg_az : ");
+        Serial.print(avg_az);
+        Serial.print("g, total_a: ");
+        Serial.print(total_a);
+        Serial.println("m/s");
+        // while (1); // Stop further processing
+      }
       }
     } else {
-      Serial.print("NANO - ");
+      Serial.print("ESP - ");
       Serial.print("Time: ");
       Serial.print(current_time / 1000.0, 2);
       Serial.print("s - Waiting for launch...");
-      Serial.print("| Time: ");
+      Serial.print(" | Time: ");
       Serial.print(current_time / 1000.0, 2);
       Serial.print("s, a_xandy: ");
       Serial.print(a_xandy);
       Serial.print("g, avg_az: ");
       Serial.println(avg_az);
+    }
+
+    if (bmp_index < duration) {
+      heightArray[index] = altitude;
+      bmp_index++;
+    }
+    else {
+      bmp_state = true;
     }
   }
 }

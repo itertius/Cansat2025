@@ -29,17 +29,17 @@ unsigned long start_time = 0;
 
 float buffer[window_size][3]; // Buffer for storing recent X, Y, Z accelerations
 int buffer_index = 0;
-float buffer_a[3][3];
+float buffer_a[window_size][3];
 int buffer_index_a = 0;
 
 void Normalize_servo() {
-  deployServo.write(0);  // Set servo to 0 degrees
+  deployServo.write(90);  // Set servo to 0 degrees
 }
 
 void Eject() {
-  deployServo.write(180);  // Move servo to 180 degrees
+  deployServo.write(0);  // Move servo to 180 degrees
   delay(3000);
-  deployServo.write(0);    // Return servo to 0 degrees
+  deployServo.write(90);    // Return servo to 0 degrees
 }
 
 void Check_module() {
@@ -57,7 +57,7 @@ void E_Eject() {
   Serial.println("** SAFETY-EJECTING **");
   deployServo.write(0);
   delay(500);
-  deployServo.write(180);
+  deployServo.write(90);
   delay(500);
 }
 
@@ -75,7 +75,7 @@ void setup() {
     buffer[i][AZ] = 0;
   }
 
-  for (int i=0; i < 3; i++) {
+  for (int i=0; i < window_size; i++) {
     buffer_a[i][AX] = 0;
     buffer_a[i][AY] = 0;
     buffer_a[i][AZ] = 0;
@@ -119,14 +119,14 @@ void loop() {
     avg_az /= window_size;
 
     float avg_total_ax = 0, avg_total_ay = 0, avg_total_az = 0;
-    for (int i=0; i < 3; i++) {
+    for (int i=0; i < window_size; i++) {
       avg_total_ax +=buffer_a[i][AX];
       avg_total_ay +=buffer_a[i][AY];
       avg_total_az +=buffer_a[i][AZ];
     }
-    avg_total_ax /= 3;
-    avg_total_ay /= 3;
-    avg_total_az /= 3;
+    avg_total_ax /= window_size;
+    avg_total_ay /= window_size;
+    avg_total_az /= window_size;
 
     float a_xandy = sqrt(avg_ax * avg_ax + avg_ay * avg_ay);
     float total_a = sqrt(avg_total_ax * avg_total_ax + avg_total_ay * avg_total_ay + avg_total_az * avg_total_az);
@@ -152,7 +152,7 @@ void loop() {
       Serial.println("m/s");
 
       if (Normal_eject || Emergency_eject) {
-        E_Eject();
+        // E_Eject();
       }
       else {
       if (current_time - start_time > emergency_time) {
