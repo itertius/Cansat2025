@@ -100,30 +100,32 @@ void initMPU(int A_range, int G_range, int BW_range) {
   }
 }
 
-float readAcc(char c) {
+float readAcc(char axis) {
   mpu.getEvent(&a, &g, &temp);
-  switch (c) {
-    case 'x':
-      return a.acceleration.x;
-    case 'y':
-      return a.acceleration.y;
-    case 'z':
-      return a.acceleration.z;
-    default :
-      return 0.0f;
+  switch (axis) {
+    case 'x': return a.acceleration.x;
+    case 'y': return a.acceleration.y;
+    case 'z': return a.acceleration.z;
+    default: return 0.0f;
   }
 }
 
-float readGyro(char c) {
+float readGyro(char axis) {
   mpu.getEvent(&a, &g, &temp);
-  switch (c) {
-    case 'x':
-      return g.gyro.x;
-    case 'y':
-      return g.gyro.y;
-    case 'z':
-      return g.gyro.z;
-    default :
-      return 0.0f;
+  switch (axis) {
+    case 'x': return g.gyro.x;
+    case 'y': return g.gyro.y;
+    case 'z': return g.gyro.z;
+    default: return 0.0f;
   }
+}
+
+float testGyro() {
+  mpu.getEvent(&a, &g, &temp);
+  Serial.println(a.acceleration.x);
+  Serial.println(a.acceleration.y);
+  Serial.println(a.acceleration.z);
+  Serial.println(g.gyro.x);
+  Serial.println(g.gyro.y);
+  Serial.println(g.gyro.z);
 }

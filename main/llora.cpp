@@ -1,19 +1,26 @@
 #include "llora.h"
 
-void initLoRa(long Fq = 935E6) {
+void initLoRa(long Fq = 915E6) {
+  SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_SS);
+
+  LoRa.setPins(LORA_SS, LORA_RST, LORA_DIO0);
+
   if (!LoRa.begin(Fq)) {
     Serial.println("LoRa Not Found!!!");
-  }
-  else {
-    Serial.print("LoRa Found!!!");
+  } else {
+    Serial.println("LoRa Found!!!");
   }
 }
 
 // [0, 0, [0, 0, 0, 0, 0, 0, 0]]
 void send(long cmd, long time, long type, long data1, long data2, long data3, long data4, long data5, long data6) {
-  String payload = "[" + String(cmd) + "," + String(time) + ",[" + String(type) + "," + String(data1) + "," + String(data2) + "," + String(data3) + "," + String(data4) + "," + String(data5) + "," + String(data6) + "]]";
-
+  char payload[150];
+  snprintf(payload, sizeof(payload), "[%ld,%ld,[%ld,%ld,%ld,%ld,%ld,%ld,%ld]]", 
+           cmd, time, type, data1, data2, data3, data4, data5, data6);
+  
   LoRa.beginPacket();
   LoRa.print(payload);
-  LoRa.endPacket();
+  if (LoRa.endPacket()) {
+    Serial.println("Send!!!");
+  }
 }
