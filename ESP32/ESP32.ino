@@ -172,7 +172,7 @@ void loop() {
         Serial.println("m/s");
         // while (1); // Stop further processing
       }
-      else if ((a_xandy >= Eject_threshold || avg_az < -9 || total_a < freefall_threshold) && current_time - start_time > normal_eject_delay) {
+      else if ((a_xandy >= Eject_threshold || total_a < freefall_threshold) && current_time - start_time > normal_eject_delay) {
         Normal_eject = true;
         Eject();
         
