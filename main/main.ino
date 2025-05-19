@@ -17,7 +17,7 @@
 String payload = "";
 const char* ssid = "CAT yamalah wifi";
 const char* password = "pppb1346";
-long Fq = 935E6;
+long Fq = 915E6;
 unsigned long previous = 0;
 unsigned long interval = 500;
 
@@ -38,6 +38,7 @@ void loop() {
     if (int(LoRa.parsePacket())) {
       payload = receive();
       pushserver(payload);
+      Serial.println(payload);
     }
   }
 

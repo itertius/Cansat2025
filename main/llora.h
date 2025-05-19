@@ -10,7 +10,7 @@
 #define LORA_MOSI  23
 #define LORA_SS    5
 #define LORA_RST   14
-#define LORA_DIO0  2
+#define LORA_DIO0  26
 
 void initLoRa(long Fq);
 String receive();

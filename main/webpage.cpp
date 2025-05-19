@@ -201,7 +201,7 @@ html, body {
     </style>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.js" integrity="sha512-L0Shl7nXXzIlBSUUPpxrokqq4ojqgZFQczTYlGjzONGTDAcLremjwaWv5A+EDLnxhQzY5xUZPWLOLqYRkY0Cbw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="https://i.ibb.co/FkQXT9gr/Sky-s-Rift-logo.png">
     <title>Sky's Rift Webserver</title>
@@ -337,11 +337,10 @@ html, body {
     
 
 </body>
-<script src="app.js"></script>
+<!-- <script src="app.js"></script> -->
 <!-- <script>main();</script> -->
 <script>
 // This is a web server for Sky's Rift Team in CANSAT - ROCKET Competition 2025 //
-
 
 // Data Stream //
 // Description: This is a data stream that contains information about the sensors and their data.
@@ -505,329 +504,329 @@ function updateStatus(data) {
 }
 // ----- //
 
-// Module Data Plot function //
-const mtx = document.getElementById("module-chart").getContext("2d");
-const moduleChart = new Chart(mtx, {
-    type: "line",
-    data: {
-        labels: [],
-        datasets: [
-            // BMP280 Data
-            {
-                label: "Temperature (°C)",
-                data: [],
-                borderColor: 'rgb(255, 99, 132)',
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                tension: 0.1,
-                yAxisID: 'y'
-            },
-            {
-                label: "Pressure (hPa)",
-                data: [],
-                borderColor: 'rgb(54, 162, 235)',
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                tension: 0.1,
-                yAxisID: 'y1'
-            },
-            {
-                label: "BMP Altitude (m)",
-                data: [],
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                tension: 0.1,
-                yAxisID: 'y2'
-            },
-            // GY-521 Acceleration Data
-            {
-                label: "Acceleration X (g)",
-                data: [],
-                borderColor: 'rgb(255, 159, 64)',
-                backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                tension: 0.1,
-                yAxisID: 'y3'
-            },
-            {
-                label: "Acceleration Y (g)",
-                data: [],
-                borderColor: 'rgb(153, 102, 255)',
-                backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                tension: 0.1,
-                yAxisID: 'y3'
-            },
-            {
-                label: "Acceleration Z (g)",
-                data: [],
-                borderColor: 'rgb(255, 159, 243)',
-                backgroundColor: 'rgba(255, 159, 243, 0.2)',
-                tension: 0.1,
-                yAxisID: 'y3'
-            },
-            // GY-521 Gyro Data
-            {
-                label: "Gyro X (°/s)",
-                data: [],
-                borderColor: 'rgb(255, 159, 64)',
-                backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                tension: 0.1,
-                yAxisID: 'y4',
-                borderDash: [5, 5]
-            },
-            {
-                label: "Gyro Y (°/s)",
-                data: [],
-                borderColor: 'rgb(153, 102, 255)',
-                backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                tension: 0.1,
-                yAxisID: 'y4',
-                borderDash: [5, 5]
-            },
-            {
-                label: "Gyro Z (°/s)",
-                data: [],
-                borderColor: 'rgb(255, 159, 243)',
-                backgroundColor: 'rgba(255, 159, 243, 0.2)',
-                tension: 0.1,
-                yAxisID: 'y4',
-                borderDash: [5, 5]
-            }
-        ]
-    },
-    options: {
-        animation: false,
-        responsive: true,
-        interaction: {
-            mode: 'index',
-            intersect: false,
-        },
-        scales: {
-            x: {
-                type: 'time',
-                time: {
-                    unit: 'second',
-                    displayFormats: {
-                        second: 'HH:mm:ss'
-                    }
-                },
-                title: {
-                    display: true,
-                    text: 'Time'
-                }
-            },
-            y: {
-                type: 'linear',
-                display: true,
-                position: 'left',
-                title: {
-                    display: true,
-                    text: 'Temperature (°C)'
-                }
-            },
-            y1: {
-                type: 'linear',
-                display: true,
-                position: 'right',
-                title: {
-                    display: true,
-                    text: 'Pressure (hPa)'
-                },
-                grid: {
-                    drawOnChartArea: false
-                }
-            },
-            y2: {
-                type: 'linear',
-                display: true,
-                position: 'right',
-                title: {
-                    display: true,
-                    text: 'Altitude (m)'
-                },
-                grid: {
-                    drawOnChartArea: false
-                }
-            },
-            y3: {
-                type: 'linear',
-                display: true,
-                position: 'right',
-                title: {
-                    display: true,
-                    text: 'Acceleration (g)'
-                },
-                grid: {
-                    drawOnChartArea: false
-                }
-            },
-            y4: {
-                type: 'linear',
-                display: true,
-                position: 'right',
-                title: {
-                    display: true,
-                    text: 'Angular Velocity (°/s)'
-                },
-                grid: {
-                    drawOnChartArea: false
-                }
-            }
-        }
-    }
-});
-// ----- //
+// // Module Data Plot function //
+// const mtx = document.getElementById("module-chart").getContext("2d");
+// const moduleChart = new Chart(mtx, {
+//     type: "line",
+//     data: {
+//         labels: [],
+//         datasets: [
+//             // BMP280 Data
+//             {
+//                 label: "Temperature (°C)",
+//                 data: [],
+//                 borderColor: 'rgb(255, 99, 132)',
+//                 backgroundColor: 'rgba(255, 99, 132, 0.2)',
+//                 tension: 0.1,
+//                 yAxisID: 'y'
+//             },
+//             {
+//                 label: "Pressure (hPa)",
+//                 data: [],
+//                 borderColor: 'rgb(54, 162, 235)',
+//                 backgroundColor: 'rgba(54, 162, 235, 0.2)',
+//                 tension: 0.1,
+//                 yAxisID: 'y1'
+//             },
+//             {
+//                 label: "BMP Altitude (m)",
+//                 data: [],
+//                 borderColor: 'rgb(75, 192, 192)',
+//                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
+//                 tension: 0.1,
+//                 yAxisID: 'y2'
+//             },
+//             // GY-521 Acceleration Data
+//             {
+//                 label: "Acceleration X (g)",
+//                 data: [],
+//                 borderColor: 'rgb(255, 159, 64)',
+//                 backgroundColor: 'rgba(255, 159, 64, 0.2)',
+//                 tension: 0.1,
+//                 yAxisID: 'y3'
+//             },
+//             {
+//                 label: "Acceleration Y (g)",
+//                 data: [],
+//                 borderColor: 'rgb(153, 102, 255)',
+//                 backgroundColor: 'rgba(153, 102, 255, 0.2)',
+//                 tension: 0.1,
+//                 yAxisID: 'y3'
+//             },
+//             {
+//                 label: "Acceleration Z (g)",
+//                 data: [],
+//                 borderColor: 'rgb(255, 159, 243)',
+//                 backgroundColor: 'rgba(255, 159, 243, 0.2)',
+//                 tension: 0.1,
+//                 yAxisID: 'y3'
+//             },
+//             // GY-521 Gyro Data
+//             {
+//                 label: "Gyro X (°/s)",
+//                 data: [],
+//                 borderColor: 'rgb(255, 159, 64)',
+//                 backgroundColor: 'rgba(255, 159, 64, 0.2)',
+//                 tension: 0.1,
+//                 yAxisID: 'y4',
+//                 borderDash: [5, 5]
+//             },
+//             {
+//                 label: "Gyro Y (°/s)",
+//                 data: [],
+//                 borderColor: 'rgb(153, 102, 255)',
+//                 backgroundColor: 'rgba(153, 102, 255, 0.2)',
+//                 tension: 0.1,
+//                 yAxisID: 'y4',
+//                 borderDash: [5, 5]
+//             },
+//             {
+//                 label: "Gyro Z (°/s)",
+//                 data: [],
+//                 borderColor: 'rgb(255, 159, 243)',
+//                 backgroundColor: 'rgba(255, 159, 243, 0.2)',
+//                 tension: 0.1,
+//                 yAxisID: 'y4',
+//                 borderDash: [5, 5]
+//             }
+//         ]
+//     },
+//     options: {
+//         animation: false,
+//         responsive: true,
+//         interaction: {
+//             mode: 'index',
+//             intersect: false,
+//         },
+//         scales: {
+//             x: {
+//                 type: 'time',
+//                 time: {
+//                     unit: 'second',
+//                     displayFormats: {
+//                         second: 'HH:mm:ss'
+//                     }
+//                 },
+//                 title: {
+//                     display: true,
+//                     text: 'Time'
+//                 }
+//             },
+//             y: {
+//                 type: 'linear',
+//                 display: true,
+//                 position: 'left',
+//                 title: {
+//                     display: true,
+//                     text: 'Temperature (°C)'
+//                 }
+//             },
+//             y1: {
+//                 type: 'linear',
+//                 display: true,
+//                 position: 'right',
+//                 title: {
+//                     display: true,
+//                     text: 'Pressure (hPa)'
+//                 },
+//                 grid: {
+//                     drawOnChartArea: false
+//                 }
+//             },
+//             y2: {
+//                 type: 'linear',
+//                 display: true,
+//                 position: 'right',
+//                 title: {
+//                     display: true,
+//                     text: 'Altitude (m)'
+//                 },
+//                 grid: {
+//                     drawOnChartArea: false
+//                 }
+//             },
+//             y3: {
+//                 type: 'linear',
+//                 display: true,
+//                 position: 'right',
+//                 title: {
+//                     display: true,
+//                     text: 'Acceleration (g)'
+//                 },
+//                 grid: {
+//                     drawOnChartArea: false
+//                 }
+//             },
+//             y4: {
+//                 type: 'linear',
+//                 display: true,
+//                 position: 'right',
+//                 title: {
+//                     display: true,
+//                     text: 'Angular Velocity (°/s)'
+//                 },
+//                 grid: {
+//                     drawOnChartArea: false
+//                 }
+//             }
+//         }
+//     }
+// });
+// // ----- //
 
-// Module Data Update Function //
-function updateModuleChart(type, temp, press, alt, ax, ay, az, gx, gy, gz) {
-    const now = new Date();
+// // Module Data Update Function //
+// function updateModuleChart(type, temp, press, alt, ax, ay, az, gx, gy, gz) {
+//     const now = new Date();
     
-    // Add new data points
-    moduleChart.data.labels.push(now);
+//     // Add new data points
+//     moduleChart.data.labels.push(now);
     
-    // Push data based on sensor type
-    switch (type) {
-        case 0: // BMP280 data
-            dataStream.push({
-                time: now,
-                temp: parseFloat(temp),
-                press: parseFloat(press), 
-                alt: parseFloat(alt)
-            });
-            // Update BMP280 chart data
-            moduleChart.data.datasets[0].data.push({x: now, y: parseFloat(temp)}); // Temperature
-            moduleChart.data.datasets[1].data.push({x: now, y: parseFloat(press)}); // Pressure
-            moduleChart.data.datasets[2].data.push({x: now, y: parseFloat(alt)}); // Altitude
-            break;
+//     // Push data based on sensor type
+//     switch (type) {
+//         case 0: // BMP280 data
+//             dataStream.push({
+//                 time: now,
+//                 temp: parseFloat(temp),
+//                 press: parseFloat(press), 
+//                 alt: parseFloat(alt)
+//             });
+//             // Update BMP280 chart data
+//             moduleChart.data.datasets[0].data.push({x: now, y: parseFloat(temp)}); // Temperature
+//             moduleChart.data.datasets[1].data.push({x: now, y: parseFloat(press)}); // Pressure
+//             moduleChart.data.datasets[2].data.push({x: now, y: parseFloat(alt)}); // Altitude
+//             break;
             
-        case 1: // GY-521 data
-            dataStream.push({
-                time: now,
-                ax: parseFloat(ax),
-                ay: parseFloat(ay),
-                az: parseFloat(az),
-                gx: parseFloat(gx),
-                gy: parseFloat(gy),
-                gz: parseFloat(gz)
-            });
-            // Update GY-521 chart data
-            moduleChart.data.datasets[3].data.push({x: now, y: parseFloat(ax)}); // Accel X
-            moduleChart.data.datasets[4].data.push({x: now, y: parseFloat(ay)}); // Accel Y
-            moduleChart.data.datasets[5].data.push({x: now, y: parseFloat(az)}); // Accel Z
-            moduleChart.data.datasets[6].data.push({x: now, y: parseFloat(gx)}); // Gyro X
-            moduleChart.data.datasets[7].data.push({x: now, y: parseFloat(gy)}); // Gyro Y
-            moduleChart.data.datasets[8].data.push({x: now, y: parseFloat(gz)}); // Gyro Z
-            break;
-    }
+//         case 1: // GY-521 data
+//             dataStream.push({
+//                 time: now,
+//                 ax: parseFloat(ax),
+//                 ay: parseFloat(ay),
+//                 az: parseFloat(az),
+//                 gx: parseFloat(gx),
+//                 gy: parseFloat(gy),
+//                 gz: parseFloat(gz)
+//             });
+//             // Update GY-521 chart data
+//             moduleChart.data.datasets[3].data.push({x: now, y: parseFloat(ax)}); // Accel X
+//             moduleChart.data.datasets[4].data.push({x: now, y: parseFloat(ay)}); // Accel Y
+//             moduleChart.data.datasets[5].data.push({x: now, y: parseFloat(az)}); // Accel Z
+//             moduleChart.data.datasets[6].data.push({x: now, y: parseFloat(gx)}); // Gyro X
+//             moduleChart.data.datasets[7].data.push({x: now, y: parseFloat(gy)}); // Gyro Y
+//             moduleChart.data.datasets[8].data.push({x: now, y: parseFloat(gz)}); // Gyro Z
+//             break;
+//     }
 
-    // Keep only last 100 points
-    if (moduleChart.data.labels.length > 100) {
-        moduleChart.data.labels.shift();
-        moduleChart.data.datasets.forEach(dataset => {
-            dataset.data.shift();
-        });
-    }
+//     // Keep only last 100 points
+//     if (moduleChart.data.labels.length > 100) {
+//         moduleChart.data.labels.shift();
+//         moduleChart.data.datasets.forEach(dataset => {
+//             dataset.data.shift();
+//         });
+//     }
 
-    moduleChart.update('none'); // Update without animation
-}
-// ----- //
+//     moduleChart.update('none'); // Update without animation
+// }
+// // ----- //
 
-// GPS Plot function //
-const gpx = document.getElementById("gps-chart").getContext("2d");
-const gpsChart = new Chart(gpx, {
-    type: 'scatter',
-    data: {
-        datasets: [
-            {
-                label: "GPS Path",
-                data: [],
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                pointRadius: 5,
-                showLine: true,
-                lineTension: 0.1
-            },
-            {
-                label: "Current Position",
-                data: [],
-                borderColor: 'rgb(255, 99, 132)',
-                backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                pointRadius: 8,
-                showLine: false
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            x: {
-                type: 'linear',
-                position: 'bottom',
-                title: {
-                    display: true,
-                    text: 'Longitude'
-                },
-                min: 100.0,
-                max: 101.0
-            },
-            y: {
-                type: 'linear',
-                position: 'left',
-                title: {
-                    display: true,
-                    text: 'Latitude'
-                },
-                min: 13.0,
-                max: 14.0
-            }
-        },
-        plugins: {
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        const data = context.raw;
-                        return [
-                            `Latitude: ${data.y.toFixed(6)}°`,
-                            `Longitude: ${data.x.toFixed(6)}°`,
-                            `Altitude: ${data.altitude?.toFixed(2) || 'N/A'}m`
-                        ];
-                    }
-                }
-            }
-        }
-    }
-});
-// ----- //
+// // GPS Plot function //
+// const gpx = document.getElementById("gps-chart").getContext("2d");
+// const gpsChart = new Chart(gpx, {
+//     type: 'scatter',
+//     data: {
+//         datasets: [
+//             {
+//                 label: "GPS Path",
+//                 data: [],
+//                 borderColor: 'rgb(75, 192, 192)',
+//                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
+//                 pointRadius: 5,
+//                 showLine: true,
+//                 lineTension: 0.1
+//             },
+//             {
+//                 label: "Current Position",
+//                 data: [],
+//                 borderColor: 'rgb(255, 99, 132)',
+//                 backgroundColor: 'rgba(255, 99, 132, 0.5)',
+//                 pointRadius: 8,
+//                 showLine: false
+//             }
+//         ]
+//     },
+//     options: {
+//         responsive: true,
+//         maintainAspectRatio: false,
+//         scales: {
+//             x: {
+//                 type: 'linear',
+//                 position: 'bottom',
+//                 title: {
+//                     display: true,
+//                     text: 'Longitude'
+//                 },
+//                 min: 100.0,
+//                 max: 101.0
+//             },
+//             y: {
+//                 type: 'linear',
+//                 position: 'left',
+//                 title: {
+//                     display: true,
+//                     text: 'Latitude'
+//                 },
+//                 min: 13.0,
+//                 max: 14.0
+//             }
+//         },
+//         plugins: {
+//             tooltip: {
+//                 callbacks: {
+//                     label: function(context) {
+//                         const data = context.raw;
+//                         return [
+//                             `Latitude: ${data.y.toFixed(6)}°`,
+//                             `Longitude: ${data.x.toFixed(6)}°`,
+//                             `Altitude: ${data.altitude?.toFixed(2) || 'N/A'}m`
+//                         ];
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// });
+// // ----- //
 
-// GPS Update Function //
-function updateGPSChart(lat, lng, alt) {
-    const newPoint = {
-        x: parseFloat(lng),
-        y: parseFloat(lat),
-        altitude: parseFloat(alt)
-    };
+// // GPS Update Function //
+// function updateGPSChart(lat, lng, alt) {
+//     const newPoint = {
+//         x: parseFloat(lng),
+//         y: parseFloat(lat),
+//         altitude: parseFloat(alt)
+//     };
 
-    // Update path dataset
-    gpsChart.data.datasets[0].data.push(newPoint);
+//     // Update path dataset
+//     gpsChart.data.datasets[0].data.push(newPoint);
 
-    // Update current position dataset
-    gpsChart.data.datasets[1].data = [newPoint];
+//     // Update current position dataset
+//     gpsChart.data.datasets[1].data = [newPoint];
 
-    // Keep only last 100 points in the path
-    if (gpsChart.data.datasets[0].data.length > 100) {
-        gpsChart.data.datasets[0].data.shift();
-    }
+//     // Keep only last 100 points in the path
+//     if (gpsChart.data.datasets[0].data.length > 100) {
+//         gpsChart.data.datasets[0].data.shift();
+//     }
 
-    // Update chart bounds if needed
-    const xScale = gpsChart.scales.x;
-    const yScale = gpsChart.scales.y;
+//     // Update chart bounds if needed
+//     const xScale = gpsChart.scales.x;
+//     const yScale = gpsChart.scales.y;
     
-    if (newPoint.x < xScale.min) xScale.min = newPoint.x - 0.1;
-    if (newPoint.x > xScale.max) xScale.max = newPoint.x + 0.1;
-    if (newPoint.y < yScale.min) yScale.min = newPoint.y - 0.1;
-    if (newPoint.y > yScale.max) yScale.max = newPoint.y + 0.1;
+//     if (newPoint.x < xScale.min) xScale.min = newPoint.x - 0.1;
+//     if (newPoint.x > xScale.max) xScale.max = newPoint.x + 0.1;
+//     if (newPoint.y < yScale.min) yScale.min = newPoint.y - 0.1;
+//     if (newPoint.y > yScale.max) yScale.max = newPoint.y + 0.1;
 
-    gpsChart.update('none');
-}
-// ----- //
+//     gpsChart.update('none');
+// }
+// // ----- //
 
 // Clock function //
 function Clock() {
@@ -965,9 +964,8 @@ function DownloadModuleLog(filter) {
 
 // WebSockets Protocol //
 let socket = null;
-
 function setupWebSocket() {
-    socket = new WebSocket('ws://localhost:8080'); // ws://your_esp32_ip.8080
+    socket = new WebSocket('ws://192.168.0.169:8080');
     socket.onopen = function() {
         console.log('WebSocket connection established');
     };
@@ -1102,9 +1100,9 @@ function dataStreamTester() {
                 break;
         }
     }
+    main();
 }
 // ----- //
 </script>
-<script>main();</script>
 </html>
 )=====";
