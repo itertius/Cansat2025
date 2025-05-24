@@ -17,7 +17,7 @@
 String payload = "";
 const char* ssid = "CAT yamalah wifi";
 const char* password = "pppb1346";
-float Fq = 921.475;
+long Fq = 921475E6;
 unsigned long previous = 0;
 unsigned long interval = 500;
 

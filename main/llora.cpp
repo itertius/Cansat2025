@@ -1,6 +1,6 @@
 #include "llora.h"
 
-void initLoRa(float Fq = 921.475) {
+void initLoRa(long Fq = 921475E6) {
   SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_SS);
 
   LoRa.setPins(LORA_SS, LORA_RST, LORA_DIO0);
