@@ -22,27 +22,27 @@ const unsigned long g_interval = 5000;
 
 // Constant
 const float sl = 1013.5;
-long Fq = 916E6;
+long Fq = 921.475E6;
 
 void setup() {
   Serial.begin(115200);
   initLoRa(Fq);
-  // initBMP();
+  initBMP(sl);
   initMPU(2, 250, 94);
-  // initGPS();
+  initGPS();
 }
 
 void loop() {
   unsigned long curr = millis();
 
   // BMP280 Call
-  // handleBMP(curr);
+  handleBMP(curr);
   
   // GY-521 Call
   handleMPU(curr);
 
   // GPS Call
-  // handleGPS(curr);
+  handleGPS(curr);
 }
 
 void handleBMP(unsigned long curr) {
@@ -64,7 +64,9 @@ void handleMPU(unsigned long curr) {
 void handleGPS(unsigned long curr) {
   if (curr - g_update >= g_interval) {
     g_update = curr;
-    auto [lat, lon, alt] = readGPS();
-    send(0, curr, 2, lat, lon, alt, 0, 0, 0);
+    float lat, lon, alt;
+    readGPS(lat, lon, alt);
+    send(0, curr, 2, 
+         (long)(lat * 1e6), (long)(lon * 1e6), (long)(alt), 
+         0, 0, 0);
   }
-}

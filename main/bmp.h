@@ -6,7 +6,7 @@
 
 extern Adafruit_BMP280 bmp;
 
-void initBMP();
+void initBMP(float sl);
 float readBMPTemp();
 float readPress();
 float readBMPAlt(float alt);

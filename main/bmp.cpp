@@ -2,7 +2,7 @@
 
 Adafruit_BMP280 bmp;
 
-void initBMP() {
+void initBMP(float sl) {
   if (!bmp.begin()) {
     Serial.println("BMP Not Found!!!");
   } else {
@@ -17,7 +17,7 @@ void initBMP() {
     Serial.println(bmp.readPressure());
 
     Serial.print("BMP Altitude = ");
-    Serial.println(bmp.readAltitude(1013.25));
+    Serial.println(bmp.readAltitude(sl));
 
     Serial.println("| -------- |");
   }
