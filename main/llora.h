@@ -12,7 +12,7 @@
 #define LORA_RST   14
 #define LORA_DIO0  26
 
-void initLoRa(long Fq);
+void initLoRa(float Fq);
 String receive();
 
 #endif
