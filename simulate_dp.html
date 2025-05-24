@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Rocket Simulation (3D)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    #container {
+      width: 100vw;
+      height: 500px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rocket Data (3D Visualization)</h1>
+  <div id="container"></div>
+  <div id="data">
+    <h2>Real-time Gyro Data</h2>
+    <p>Roll: <span id="roll-value">0</span> deg</p>
+    <p>Pitch: <span id="pitch-value">0</span> deg</p>
+    <p>Yaw: <span id="yaw-value">0</span> deg</p>
+  </div>
+  <button id="serial-button">Request Serial Port</button>
+  
+  <script>
+    const container = document.getElementById('container');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
+    
+    const rocketGeometry = new THREE.BoxGeometry(1, 5, 1); // Dimensions for the rocket body
+    const rocketMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 }); // Red color for the rocket body
+    const rocket = new THREE.Mesh(rocketGeometry, rocketMaterial);
+    scene.add(rocket);
+
+    const noseconeGeometry = new THREE.ConeGeometry(1, 3, 32); // Dimensions for the nosecone
+    const noseconeMaterial = new THREE.MeshLambertMaterial({ color: 0xffff00 }); // Yellow color for the nosecone
+    const nosecone = new THREE.Mesh(noseconeGeometry, noseconeMaterial);
+    nosecone.position.y = 3; // Adjust position to attach nosecone to rocket
+    rocket.add(nosecone); // Attach nosecone as child of rocket
+    
+    const ambientLight = new THREE.AmbientLight(0xcccccc, 0.5);
+    scene.add(ambientLight);
+    
+    camera.position.z = 10;
+
+    let gyroData = { x: 0, y: 0, z: 0 }; // Initialize gyro data
+    
+    function updateRocketVisualization() {
+      // Apply gyro data to rocket rotation along different axes
+      const { x, y, z } = gyroData;
+      rocket.rotation.x = x;
+      rocket.rotation.y =y;
+      rocket.rotation.z = z;
+      
+      renderer.render(scene, camera);
+    }
+    
+    function handleData(event) {
+      const text = event.data;
+      const values = text.trim().split(',');
+      let roll = parseFloat(values[0]);
+      let pitch = parseFloat(values[1]);
+      let yaw = parseFloat(values[2]);
+      
+      // Check if gyro data is NaN, and if so, set it to the previous value
+      if (isNaN(roll)) {
+        roll = gyroData.x;
+      }
+      if (isNaN(pitch)) {
+        pitch = gyroData.y;
+      }
+      if (isNaN(yaw)) {
+        yaw = gyroData.z;
+      }
+      
+      // Update gyro data
+      gyroData = { x: roll, y: pitch, z: yaw };
+      
+      // Update visualization
+      updateRocketVisualization();
+
+      // Update gyro data display
+      document.getElementById('roll-value').textContent = roll.toFixed(2);
+      document.getElementById('pitch-value').textContent = pitch.toFixed(2);
+      document.getElementById('yaw-value').textContent = yaw.toFixed(2);
+    }
+    
+    // Request serial port
+    document.getElementById('serial-button').addEventListener('click', () => {
+      navigator.serial.requestPort().then(selectedPort => {
+        serial = selectedPort;
+        console.log("Serial port connected");
+        connectSerial();
+      }).catch(error => {
+        console.error("Error requesting port:", error);
+      });
+    });
+
+    function connectSerial() {
+      serial.open({ baudRate: 115200 }).then(() => {
+        console.log("Serial connection established!");
+        const reader = serial.readable.getReader();
+
+        function readData() {
+          reader.read().then(({ value, done }) => {
+            if (!done) {
+              const text = new TextDecoder().decode(value);
+              handleData({ data: text });  // Call handleData with received data
+              readData();  // Read next chunk of data
+            } else {
+              console.log("Serial port closed.");
+            }
+          }).catch(error => {
+            console.error("Error reading data:", error);
+          });
+        }
+
+        readData();  
+      }).catch(error => {
+        console.error("Serial connection error:", error);
+      });
+    }
+  </script>
+</body>
+</html>

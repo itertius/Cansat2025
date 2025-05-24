@@ -9,10 +9,10 @@ int servoPin = 2; // PWM pin connected to the servo signal wire
 
 // Constants
 const float Launch_threshold = -9.0;  // G-force threshold from Z-axis
-const float Eject_threshold = 7.83;   // sqrt(x^2 + y^2) | 8.0 = 54.6 degrees || 7.83 = 53 degrees
+const float Eject_threshold = 9.21;   // sqrt(x^2 + y^2) | 8.0 = 54.6 degrees || 7.83 = 53 degrees || 6.93 = 45 degree || 9.8 = 90 degree || 8.84 = 60 degree || 9.21 = 70 degree
 const float freefall_threshold = 2;   // sqrt(ax² + ay² + az²) | < 2 = freefall
 const int emergency_time = 10000;     // milliseconds
-const int normal_eject_delay = 2000;  // milliseconds
+const int normal_eject_delay = 2000;  // milliseconds | default = 2000
 const int window_size = 10;           // Window size for moving average filter
 const unsigned long interval = 100;   // Interval duration in milliseconds
 
@@ -46,9 +46,6 @@ void Check_module() {
   // MPU6050
   if (!mpu.begin()) {
     Serial.println("Failed to find MPU6050 chip");
-    while (1) {
-      delay(10);
-    }
   }
   Serial.println("Found MPU6050");
 }
@@ -105,7 +102,7 @@ void loop() {
     buffer_a[buffer_index_a][AX] = ax;
     buffer_a[buffer_index_a][AY] = ay;
     buffer_a[buffer_index_a][AZ] = az;
-    buffer_index_a = (buffer_index_a + 1) % 3;
+    buffer_index_a = (buffer_index_a + 1) % window_size;
 
     // Calculate moving average
     float avg_ax = 0, avg_ay = 0, avg_az = 0;
@@ -180,7 +177,7 @@ void loop() {
         Serial.print(current_time / 1000.0, 2);
         Serial.print("s - Normal Eject");
         if (a_xandy >= Eject_threshold) {
-          Serial.println("| >= 53 degree");
+          Serial.println("| >= 45 degree");
         }
         else if (avg_az < -9) {
           Serial.println("| < G-force");
