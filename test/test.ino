@@ -1,11 +1,17 @@
-
+int i = 0;
+unsigned long pre = 0;
+unsigned long inter = 1000;
 
 void setup() {
-  // put your setup code here, to run once:
-
+  // Serial.begin(9600);
+  // i++;
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
+  // unsigned long cur = millis();
+  // if (cur - pre >= inter) {
+  //   Serial.println(i);
+  //   i++;
+  //   pre = cur;
+  // }
 }
