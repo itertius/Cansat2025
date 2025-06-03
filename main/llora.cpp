@@ -1,6 +1,6 @@
 #include "llora.h"
 
-void initLoRa(long Fq = 921475E6) {
+void initLoRa(long Fq = 921.925E6) {
   SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_SS);
 
   LoRa.setPins(LORA_SS, LORA_RST, LORA_DIO0);
@@ -15,9 +15,14 @@ void initLoRa(long Fq = 921475E6) {
 }
 
 String receive() {
-  if (!LoRa.available()) return "";
   String incoming = "";
-  while (LoRa.available()) incoming += (char)LoRa.read();
-
+  int packetSize = LoRa.parsePacket();
+  if (packetSize > 0) {
+    while (LoRa.available()) {
+      char c = (char)LoRa.read();
+      incoming += c;
+    }
+  }
+  Serial.print(incoming);
   return incoming;
 }

@@ -251,13 +251,13 @@ html, body {
         <div class="content-lr">
             <div class="content-left">
                 <div class="ax">
-                    X : <span id="ax">0</span> g
+                    X : <span id="ax">0</span> m/s
                 </div>
                 <div class="ay">
-                    Y : <span id="ay">0</span> g
+                    Y : <span id="ay">0</span> m/s
                 </div>
                 <div class="az">
-                    Z : <span id="az">0</span> g
+                    Z : <span id="az">0</span> m/s
                 </div>
             </div>
             <div class="content-right">
@@ -338,7 +338,6 @@ html, body {
 
 </body>
 <!-- <script src="app.js"></script> -->
-<!-- <script>main();</script> -->
 <script>
 // This is a web server for Sky's Rift Team in CANSAT - ROCKET Competition 2025 //
 
@@ -417,52 +416,43 @@ function updateMap(lat, lon) {
 
 // Module Function //
 function updateModuleData(data) {
+    if (!Array.isArray(data)) {
+        console.error("Invalid module data format", data);
+        return;
+    }
+
     const type = data[0];
+
     switch (type) {
-        case 0: // BMP280
-            // BMP280 == 0 : ["0" , "temp" , "press", "alt"]
-            console.log("temp", data[1], "°C");
-            console.log("press", data[2], "hPa");
-            console.log("alt", data[3], "m");
-            document.getElementById("temp").innerHTML = data[1];
-            document.getElementById("press").innerHTML = data[2];
-            document.getElementById("bmp-alt").innerHTML = data[3];
-
+        case 0: // BMP280: [0, temp, press, alt]
+            document.getElementById("temp").textContent = data[1];
+            document.getElementById("press").textContent = data[2];
+            document.getElementById("bmp-alt").textContent = data[3];
             updateModuleChart(type, data[1], data[2], data[3]);
-            break
-        case 1: // GY
-            // GY == 1 : ["1" , "ax" , "ay" , "az" , "gx" , "gy" , "gz"]
-            console.log("ax", data[1], "g");
-            console.log("ay", data[2], "g");
-            console.log("az", data[3], "g");
-            console.log("gx", data[4], "°/s");
-            console.log("gy", data[5], "°/s");
-            console.log("gz", data[6], "°/s");
-            document.getElementById("ax").innerHTML = data[1];
-            document.getElementById("ay").innerHTML = data[2];
-            document.getElementById("az").innerHTML = data[3];
-            document.getElementById("gx").innerHTML = data[4];
-            document.getElementById("gy").innerHTML = data[5];
-            document.getElementById("gz").innerHTML = data[6];
+            break;
 
+        case 1: // GY-521: [1, ax, ay, az, gx, gy, gz]
+            document.getElementById("ax").textContent = data[1];
+            document.getElementById("ay").textContent = data[2];
+            document.getElementById("az").textContent = data[3];
+            document.getElementById("gx").textContent = data[4];
+            document.getElementById("gy").textContent = data[5];
+            document.getElementById("gz").textContent = data[6];
             updateModuleChart(type, data[1], data[2], data[3], data[4], data[5], data[6]);
             break;
-        case 2: // GPS
-            // GPS == 2 : ["2" , "lat" , "lon" , "alt"]
-            console.log("lat", data[1], "°");
-            console.log("lon", data[2], "°");
-            console.log("alt", data[3], "m");
-            let position = count_marker+1;
-            document.getElementById("pos").innerHTML = position;
-            document.getElementById("lat").innerHTML = data[1];
-            document.getElementById("lon").innerHTML = data[2];
-            document.getElementById("gps-alt").innerHTML = data[3];
-            updateMap(data[1], data[2]);
 
+        case 2: // GPS: [2, lat, lon, alt]
+            const position = count_marker + 1;
+            document.getElementById("pos").textContent = position;
+            document.getElementById("lat").textContent = data[1];
+            document.getElementById("lon").textContent = data[2];
+            document.getElementById("gps-alt").textContent = data[3];
+            updateMap(data[1], data[2]);
             updateGPSChart(data[1], data[2], data[3]);
             break;
+
         default:
-            console.error("Unknown Module Type");
+            console.error("Unknown Module Type:", type);
     }
 }
 // ----- //
@@ -470,36 +460,40 @@ function updateModuleData(data) {
 // Status function //
 function updateStatus(data) {
     const status = data[0];
+
     switch (status) {
-        case 1:
+        case 1: // Launch
             console.log("Launch Status");
-            document.getElementById("launch").innerHTML = "🟢";
-            document.getElementById("flight").innerHTML = "🟡";
+            document.getElementById("launch").textContent = "🟢";
+            document.getElementById("flight").textContent = "🟡";
             break;
-        case 2:
+
+        case 2: // In Flight
             console.log("In Flight Status");
+            document.getElementById("flight").textContent = "🟢";
             break;
-        case 3:
+
+        case 3: // Landed
             console.log("Landed Status");
-            document.getElementById("flight").innerHTML = "🟢";
-            document.getElementById("land").innerHTML = "🟢";
+            document.getElementById("flight").textContent = "🟢";
+            document.getElementById("land").textContent = "🟢";
             break;
-        case 4:
+
+        case 4: // Error
             console.log("ERROR Status");
-            break
-        default:
-            console.error("Unknown Status");
-    }
-    switch (status) {
-        case 5:
-            console.log("Ejected");
-            document.getElementById("deploy").innerHTML = "🟢";
             break;
-        case 6:
+
+        case 5: // Ejected
+            console.log("Ejected");
+            document.getElementById("deploy").textContent = "🟢";
+            break;
+
+        case 6: // Not Ejected
             console.log("Not Ejected");
             break;
+
         default:
-            console.error("Unknown Status");
+            console.error("Unknown Status:", status);
     }
 }
 // ----- //
@@ -965,29 +959,32 @@ function DownloadModuleLog(filter) {
 // WebSockets Protocol //
 let socket = null;
 function setupWebSocket() {
-    socket = new WebSocket('ws://192.168.0.169:8080');
+    socket = new WebSocket(`ws://${location.hostname}:81`);
     socket.onopen = function() {
         console.log('WebSocket connection established');
     };
-    socket.onmessage = function(event) {
-        const msg = JSON.parse(event.data);
-        const cmd = msg[0];
-        const time = msg[1];
 
-        Runtime(time);
-        Log(msg[2]);
+socket.onmessage = function(event) {
+    console.log("📡 WebSocket Message Received:", event.data); // ✅ Logs raw payload
 
-        switch (cmd) {
-            case 0:
-                updateModuleData(data[2]);
-                break;
-            case 1:
-                updateStatus(data[2]);
-                break;
-            default:
-                console.error("Unknown Data Type");
-        }
-    };
+    const msg = JSON.parse(event.data);
+    const cmd = msg[0];
+    const time = msg[1];
+    const data = msg[2];
+
+    console.log("🔍 Parsed:", { cmd, time, data });
+
+    Runtime(time);
+    Log([cmd, data]);
+
+    if (cmd === 0) {
+        updateModuleData(data);
+    } else if (cmd === 1) {
+        updateStatus(data);
+    }
+};
+
+
     socket.onerror = function(error) {
         console.error('WebSocket error:', error);
     }
@@ -1103,6 +1100,10 @@ function dataStreamTester() {
     main();
 }
 // ----- //
+
+window.onload = function () {
+    main();
+};
 </script>
 </html>
 )=====";

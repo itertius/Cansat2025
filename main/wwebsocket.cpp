@@ -11,5 +11,7 @@ void handSocket() {
 }
 
 void pushserver(String payload) {
-  ws.broadcastTXT(payload);
+  if (payload.length() > 0) {
+    ws.broadcastTXT(payload);
+  }
 }
