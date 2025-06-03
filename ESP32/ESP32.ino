@@ -8,12 +8,13 @@ Servo deployServo;
 int servoPin = 2; // PWM pin connected to the servo signal wire
 
 // Constants
-const float Launch_threshold = -9.0;  // G-force threshold from Z-axis
-const float Eject_threshold = 9.21;   // sqrt(x^2 + y^2) | 8.0 = 54.6 degrees || 7.83 = 53 degrees || 6.93 = 45 degree || 9.8 = 90 degree || 8.84 = 60 degree || 9.21 = 70 degree
+const float Launch_threshold = 0;  // G-force threshold from Z-axis
+const float Eject_threshold = 8.84;      // sqrt(x^2 + y^2) | 8.0 = 54.6 degrees || 7.83 = 53 degrees || 6.93 = 45 degree || 9.8 = 90 degree || 8.84 = 60 degree || 9.21 = 70 degree
 const float freefall_threshold = 2;   // sqrt(ax² + ay² + az²) | < 2 = freefall
 const int emergency_time = 10000;     // milliseconds
 const int normal_eject_delay = 2000;  // milliseconds | default = 2000
-const int window_size = 10;           // Window size for moving average filter
+const int window_size = 10;           // Window size for moving average filter | default = 10 (1 seconds)
+const int eject_window_size = 10;     // Window size for eject threshold
 const unsigned long interval = 100;   // Interval duration in milliseconds
 
 // Buffer index constants
@@ -22,7 +23,7 @@ const int AY = 1;
 const int AZ = 2;
 
 // Global variables
-bool Launch_state = false;
+bool Launch_state = true;
 bool Normal_eject = false;
 bool Emergency_eject = false;
 unsigned long start_time = 0;
@@ -72,7 +73,7 @@ void setup() {
     buffer[i][AZ] = 0;
   }
 
-  for (int i=0; i < window_size; i++) {
+  for (int i=0; i < eject_window_size; i++) {
     buffer_a[i][AX] = 0;
     buffer_a[i][AY] = 0;
     buffer_a[i][AZ] = 0;
@@ -102,7 +103,7 @@ void loop() {
     buffer_a[buffer_index_a][AX] = ax;
     buffer_a[buffer_index_a][AY] = ay;
     buffer_a[buffer_index_a][AZ] = az;
-    buffer_index_a = (buffer_index_a + 1) % window_size;
+    buffer_index_a = (buffer_index_a + 1) % eject_window_size;
 
     // Calculate moving average
     float avg_ax = 0, avg_ay = 0, avg_az = 0;
@@ -116,16 +117,17 @@ void loop() {
     avg_az /= window_size;
 
     float avg_total_ax = 0, avg_total_ay = 0, avg_total_az = 0;
-    for (int i=0; i < window_size; i++) {
+    for (int i=0; i < eject_window_size; i++) {
       avg_total_ax +=buffer_a[i][AX];
       avg_total_ay +=buffer_a[i][AY];
       avg_total_az +=buffer_a[i][AZ];
     }
-    avg_total_ax /= window_size;
-    avg_total_ay /= window_size;
-    avg_total_az /= window_size;
+    avg_total_ax /= eject_window_size;
+    avg_total_ay /= eject_window_size;
+    avg_total_az /= eject_window_size;
 
-    float a_xandy = sqrt(avg_ax * avg_ax + avg_ay * avg_ay);
+    // float a_xandy = sqrt(avg_ax * avg_ax + avg_ay * avg_ay);
+    float a_xandy = sqrt(ax * ax + ay * ay);
     float total_a = sqrt(avg_total_ax * avg_total_ax + avg_total_ay * avg_total_ay + avg_total_az * avg_total_az);
     
     if (avg_az <= Launch_threshold && !Launch_state) {
@@ -152,24 +154,24 @@ void loop() {
         // E_Eject();
       }
       else {
-      if (current_time - start_time > emergency_time) {
-        Emergency_eject = true;
-        Eject();
-        Serial.print("Time: ");
-        Serial.print(current_time / 1000.0, 2);
-        Serial.println("s - Emergency Eject");
-        Serial.print("Time: ");
-        Serial.print(current_time / 1000.0, 2);
-        Serial.print("s, a_xandy: ");
-        Serial.print(a_xandy);
-        Serial.print("m/s, avg_az : ");
-        Serial.print(avg_az);
-        Serial.print("g, total_a: ");
-        Serial.print(total_a);
-        Serial.println("m/s");
-        // while (1); // Stop further processing
-      }
-      else if ((a_xandy >= Eject_threshold || total_a < freefall_threshold) && current_time - start_time > normal_eject_delay) {
+      // if (current_time - start_time > emergency_time) {
+      //   Emergency_eject = true;
+      //   Eject();
+      //   Serial.print("Time: ");
+      //   Serial.print(current_time / 1000.0, 2);
+      //   Serial.println("s - Emergency Eject");
+      //   Serial.print("Time: ");
+      //   Serial.print(current_time / 1000.0, 2);
+      //   Serial.print("s, a_xandy: ");
+      //   Serial.print(a_xandy);
+      //   Serial.print("m/s, avg_az : ");
+      //   Serial.print(avg_az);
+      //   Serial.print("g, total_a: ");
+      //   Serial.print(total_a);
+      //   Serial.println("m/s");
+      //   // while (1); // Stop further processing
+      // }
+      if ((a_xandy >= Eject_threshold) && current_time - start_time > normal_eject_delay) {
         Normal_eject = true;
         Eject();
         
