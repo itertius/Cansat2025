@@ -11,7 +11,7 @@
 #define LORA_RST   14
 #define LORA_DIO0  26
 
-void initLoRa(long Fq);
-void send(long cmd, long time, long type, long data1, long data2, long data3, long data4, long data5, long data6);
+bool initLoRa(long Fq);
+void send(float cmd, float time, float type, float data1, float data2, float data3, float data4, float data5, float data6);
 
 #endif

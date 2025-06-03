@@ -4,9 +4,10 @@ Adafruit_MPU6050 mpu;
 
 sensors_event_t a, g, temp;
 
-void initMPU(int A_range, int G_range, int BW_range) {
+bool initMPU(int A_range, int G_range, int BW_range) {
   if (!mpu.begin()) {
     Serial.println("MPU Not Found!!!");
+    return false;
   }
   else {
     Serial.println("MPU Found!!!");
@@ -97,11 +98,15 @@ void initMPU(int A_range, int G_range, int BW_range) {
 
     Serial.println("Finished init MPU!!!");
     Serial.println("| -------- |"); 
+    return true;
   }
 }
 
-float readAcc(char axis) {
+void updateMPU() {
   mpu.getEvent(&a, &g, &temp);
+}
+
+float readAcc(char axis) {
   switch (axis) {
     case 'x': return a.acceleration.x;
     case 'y': return a.acceleration.y;
@@ -111,13 +116,16 @@ float readAcc(char axis) {
 }
 
 float readGyro(char axis) {
-  mpu.getEvent(&a, &g, &temp);
   switch (axis) {
     case 'x': return g.gyro.x;
     case 'y': return g.gyro.y;
     case 'z': return g.gyro.z;
     default: return 0.0f;
   }
+}
+
+float readTemp() {
+  return temp.temperature;
 }
 
 float testGyro() {

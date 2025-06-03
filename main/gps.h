@@ -1,15 +1,13 @@
 #ifndef GPS_H
 #define GPS_H
 
-#include <TinyGPSPlus.h>
+#include <TinyGPS++.h>
 #include <tuple>
+#include <HardwareSerial.h>
 
 extern TinyGPSPlus gps;
 
 void initGPS();
-float readLat();
-float readLon();
-float readGPSAlt();
-std::tuple<float, float, float> readGPS();
+bool readGPS(float &lat, float &lon, float &alt);
 
 #endif

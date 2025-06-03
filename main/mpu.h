@@ -6,9 +6,11 @@
 
 extern Adafruit_MPU6050 mpu;
 
-void initMPU(int A_range, int G_range, int BW_range);
+bool initMPU(int A_range, int G_range, int BW_range);
 float readAcc(char axis);
 float readGyro(char axis);
+float readTemp();
 float testGyro();
+void updateMPU();
 
 #endif

@@ -9,27 +9,19 @@ TinyGPSPlus gps;
 HardwareSerial gpsSerial(1);
 
 void initGPS() {
-gpsSerial.begin(9600, SERIAL_8N1, GPS_RX, GPS_TX);
-  Serial.println("Init GPS!!!");
-  while (!gps.location.isValid()) {
-    Serial.println("Waiting for GPS...");
-    delay(1000);
-  }
-  Serial.println("GPS Found!!!");
+  gpsSerial.begin(9600, SERIAL_8N1, GPS_RX, GPS_TX);
+  Serial.println("Init GPS!");
 }
 
-float lastLat = 0.0f;
-float lastLon = 0.0f;
-float lastAlt = 0.0f;
-
-std::tuple<float, float, float> readGPS() {
+bool readGPS(float &lat, float &lon, float &alt) {
   while (gpsSerial.available()) {
     gps.encode(gpsSerial.read());
   }
-  if (gps.location.isUpdated()) {
-    lastLat = gps.location.lat();
-    lastLon = gps.location.lng();
-    lastAlt = gps.altitude.meters();
+  if (gps.location.isValid() && gps.location.isUpdated()) {
+    lat = gps.location.lat();
+    lon = gps.location.lng();
+    alt = gps.altitude.meters();
+    return true;
   }
-  return std::make_tuple(0.0f, 0.0f, 0.0f);
+  return false;
 }
