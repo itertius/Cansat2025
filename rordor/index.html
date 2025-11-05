@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RainScout Ground Station</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #131c30;
+      --card: #1b2740;
+      --ink: #e8eefc;
+      --muted: #94a3c7;
+      --good: #36c98e;
+      --warn: #ffcc66;
+      --bad: #ff6b6b;
+      --accent: #3aa0ff;
+      --radius-lg: 20px;
+      --radius-sm: 10px;
+      --gap-lg: 24px;
+      --gap-sm: 12px;
+      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+      line-height: 1.45;
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .layout {
+      width: 100%;
+      max-width: 1100px;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      grid-template-areas:
+        "head side"
+        "main side"
+        "cfg side";
+      gap: var(--gap-lg);
+    }
+
+    @media(max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "head"
+          "main"
+          "side"
+          "cfg";
+      }
+    }
+
+    .header-card {
+      grid-area: head;
+      background: radial-gradient(circle at 0% 0%, rgba(58,160,255,0.25) 0%, rgba(27,39,64,0) 60%), var(--card);
+      border-radius: var(--radius-lg);
+      padding: var(--gap-lg);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--gap-sm);
+    }
+
+    .title-block h1 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .title-block h1 .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--good);
+      box-shadow: 0 0 10px var(--good), 0 0 30px var(--good);
+    }
+
+    .title-block .sub {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 400;
+      margin-top: 4px;
+    }
+
+    .coords {
+      text-align: right;
+      min-width: 160px;
+    }
+    .coords-label {
+      color: var(--muted);
+      font-size: 0.7rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+    .coords-val {
+      font-size: 0.9rem;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .header-bottom {
+      margin-top: var(--gap-lg);
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--gap-sm);
+    }
+
+    .last-update .val {
+      color: var(--ink);
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .status-chip {
+      background: rgba(54,201,142,0.1);
+      color: var(--good);
+      border: 1px solid rgba(54,201,142,0.4);
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      line-height: 1.2;
+      display: inline-block;
+      min-width: max-content;
+    }
+
+    .no-signal {
+      background: rgba(255,107,107,0.08);
+      border: 1px solid rgba(255,107,107,0.4);
+      color: var(--bad);
+    }
+
+    .main-grid {
+      grid-area: main;
+      display: grid;
+      gap: var(--gap-lg);
+      grid-template-columns: repeat(auto-fit, minmax(min(240px,100%),1fr));
+    }
+
+    .card {
+      background-color: var(--panel);
+      border-radius: var(--radius-lg);
+      padding: var(--gap-lg);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.7);
+      border: 1px solid rgba(255,255,255,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card .label {
+      color: var(--muted);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 6px;
+    }
+
+    .card .value-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .card .value {
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .card .unit {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .card .desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.4;
+      margin-top: 8px;
+      max-width: 220px;
+    }
+
+    .side-panel {
+      grid-area: side;
+      background-color: var(--panel);
+      border-radius: var(--radius-lg);
+      padding: var(--gap-lg);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.7);
+      border: 1px solid rgba(255,255,255,0.05);
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap-lg);
+    }
+
+    .side-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: var(--gap-sm);
+    }
+
+    .side-head .left .side-title {
+      margin: 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .side-head .left .side-sub {
+      color: var(--muted);
+      font-size: 0.75rem;
+      margin-top: 4px;
+      line-height: 1.3;
+      max-width: 220px;
+    }
+
+    .risk-chip {
+      font-size: 0.7rem;
+      font-weight: 500;
+      line-height: 1.2;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255,107,107,0.4);
+      background: rgba(255,107,107,0.08);
+      color: var(--bad);
+      min-width: max-content;
+    }
+
+    .risk-chip.ok {
+      border: 1px solid rgba(54,201,142,0.4);
+      background: rgba(54,201,142,0.1);
+      color: var(--good);
+    }
+
+    .risk-chip.warn {
+      border: 1px solid rgba(255,204,102,0.4);
+      background: rgba(255,204,102,0.08);
+      color: var(--warn);
+    }
+
+    .rain-block {
+      background: radial-gradient(circle at 0% 0%, rgba(255,107,107,0.18) 0%, rgba(27,39,64,0) 60%);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255,255,255,0.05);
+      background-color: var(--card);
+      padding: var(--gap-lg);
+      box-shadow: inset 0 0 60px rgba(255,107,107,0.15), 0 24px 60px rgba(0,0,0,0.8);
+    }
+
+    .rain-label {
+      color: var(--muted);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 6px;
+    }
+    .rain-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .rain-val {
+      font-size: 2.4rem;
+      font-weight: 600;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+    .rain-unit {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .rain-hint {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.4;
+      margin-top: 8px;
+    }
+
+    .foot-note {
+      font-size: 0.7rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .cfg-panel {
+      grid-area: cfg;
+      background-color: var(--panel);
+      border-radius: var(--radius-lg);
+      padding: var(--gap-lg);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.7);
+      border: 1px solid rgba(255,255,255,0.05);
+      color: var(--ink);
+      font-size: 0.8rem;
+    }
+
+    .cfg-title {
+      color: var(--ink);
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin: 0 0 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cfg-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+    }
+
+    input.cfg-input {
+      background-color: var(--card);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-sm);
+      color: var(--ink);
+      padding: 8px 10px;
+      font-size: 0.8rem;
+      min-width: 120px;
+      font-family: var(--font);
+    }
+
+    button.btn {
+      appearance: none;
+      cursor: pointer;
+      background-color: var(--accent);
+      border: 0;
+      border-radius: var(--radius-sm);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      line-height: 1.2;
+      padding: 8px 12px;
+      min-width: max-content;
+      box-shadow: 0 20px 40px rgba(58,160,255,0.4);
+    }
+    button.btn:active {
+      transform: scale(0.98);
+    }
+
+    .ok    { color: var(--good); }
+    .warn  { color: var(--warn); }
+    .bad   { color: var(--bad); }
+    .muted { color: var(--muted); }
+
+    code {
+      background: rgba(255,255,255,0.07);
+      color: var(--ink);
+      border-radius: 6px;
+      padding: 2px 4px;
+      font-size: 0.7rem;
+    }
+
+    pre#logBox {
+      background: #00000044;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-sm);
+      color: var(--muted);
+      font-size: 0.7rem;
+      line-height: 1.4;
+      padding: 8px;
+      max-height: 160px;
+      overflow-y: auto;
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+
+    <!-- HEADER -->
+    <section class="header-card">
+      <div class="header-top">
+        <div class="title-block">
+          <h1>
+            <span class="dot" id="onlineDot"></span>
+            RainScout Ground Station
+          </h1>
+          <div class="sub">
+            Near-surface saturation watcher · LoRa downlink monitor
+          </div>
+        </div>
+
+        <div class="coords">
+          <div class="coords-label">COORDINATE</div>
+          <div class="coords-val">
+            <span id="lat">--.--</span>,
+            <span id="lon">--.--</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-bottom">
+        <div class="last-update">
+          <div class="coords-label">LAST UPDATE</div>
+          <div class="val" id="lastUpdate">--:--:--</div>
+        </div>
+
+        <div>
+          <div class="coords-label">LINK STATUS</div>
+          <span class="status-chip" id="linkStatus">NO SERIAL</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIN METRIC CARDS -->
+    <main class="main-grid">
+
+      <!-- Temperature from ESP32 -->
+      <div class="card">
+        <div class="label">Air Temp</div>
+        <div class="value-row">
+          <div class="value" id="tempVal">--.-</div>
+          <div class="unit">°C</div>
+        </div>
+        <div class="desc">
+          From ESP32 packet <code>data[0]</code>.
+        </div>
+      </div>
+
+      <!-- Dew Point (calc) -->
+      <div class="card">
+        <div class="label">Dew Point</div>
+        <div class="value-row">
+          <div class="value" id="dewVal">--.-</div>
+          <div class="unit">°C</div>
+        </div>
+        <div class="desc">
+          Magnus–Tetens using Temp(°C) from ESP32 + RH% from OpenWeather.
+        </div>
+      </div>
+
+      <!-- Dew Point Depression -->
+      <div class="card">
+        <div class="label">ΔT = T − Td</div>
+        <div class="value-row">
+          <div class="value" id="dpdVal">--.-</div>
+          <div class="unit">°C</div>
+        </div>
+        <div class="desc">
+          Small ΔT (≤2°C) ⇒ saturated air, rain likely.
+        </div>
+      </div>
+
+      <!-- Humidity from OpenWeather -->
+      <div class="card">
+        <div class="label">Humidity</div>
+        <div class="value-row">
+          <div class="value" id="rhVal">--</div>
+          <div class="unit">%</div>
+        </div>
+        <div class="desc">
+          RH from OpenWeather at given lat/lon.
+        </div>
+      </div>
+
+    </main>
+
+    <!-- RAIN PROBABILITY PANEL -->
+    <aside class="side-panel">
+      <div class="side-head">
+        <div class="left">
+          <h2 class="side-title">
+            Rain Probability
+            <span class="risk-chip ok" id="riskLabel">NORMAL</span>
+          </h2>
+          <div class="side-sub">
+            Heuristic fusion of dew point, RH, cloud cover, and last-hour rain.
+          </div>
+        </div>
+        <div class="right" style="text-align:right;">
+          <div class="coords-label">CLOUD COVER</div>
+          <div class="coords-val"><span id="cloudVal">--</span>%</div>
+        </div>
+      </div>
+
+      <div class="rain-block">
+        <div class="rain-label">Nowcast</div>
+        <div class="rain-row">
+          <div class="rain-val" id="rainProbVal">--</div>
+          <div class="rain-unit">%</div>
+        </div>
+        <div class="rain-hint" id="rainHint">
+          Waiting for data...
+        </div>
+      </div>
+
+      <div class="foot-note">
+        This is a short-term rain risk score.
+        Use it in field ops, not as long-term forecast.
+      </div>
+    </aside>
+
+    <!-- CONFIG / SERIAL / LOG -->
+    <section class="cfg-panel">
+      <h2 class="cfg-title">Config / Link</h2>
+
+      <div class="cfg-row">
+        <div>
+          <label for="latInput">Latitude</label>
+          <input class="cfg-input" id="latInput" value="14.519475883268951" />
+        </div>
+        <div>
+          <label for="lonInput">Longitude</label>
+          <input class="cfg-input" id="lonInput" value="100.92502992112907" />
+        </div>
+      </div>
+
+      <div class="cfg-row">
+        <div style="flex:1;">
+          <label for="apiKeyInput">OpenWeather API Key</label>
+          <input class="cfg-input" id="apiKeyInput" placeholder="9f48b8ba8b5ca82639afaab06e1d713b" />
+        </div>
+      </div>
+
+      <div class="cfg-row">
+        <button class="btn" id="connectSerialBtn">Connect Serial</button>
+        <button class="btn" id="refreshWeatherBtn">Refresh Weather</button>
+      </div>
+
+      <label>Log</label>
+      <pre id="logBox"></pre>
+    </section>
+
+  </div>
+
+  <script>
+    // ==========================================================
+    // SECTION 1. Helpers: dew point, rain probability, clamps
+    // ==========================================================
+
+    function dewPointCelsius(Tc, RH) {
+      // Magnus–Tetens
+      const a = 17.62;
+      const b = 243.12;
+      const gamma = Math.log(RH/100.0) + (a * Tc) / (b + Tc);
+      const Td = (b * gamma) / (a - gamma);
+      return Td;
+    }
+
+    function clamp(x, lo, hi) {
+      return Math.max(lo, Math.min(hi, x));
+    }
+
+    function rainProbability(DPD_c, RH_percent, cloud_percent, rain_last_hour_mm) {
+      const moisture_score = clamp(1.0 - (DPD_c / 5.0), 0.0, 1.0);
+      const rh_score       = clamp(RH_percent / 100.0, 0.0, 1.0);
+      const cloud_score    = clamp(Math.pow(cloud_percent / 100.0, 0.7), 0.0, 1.0);
+
+      const base_prob = 100.0 * moisture_score * rh_score * cloud_score;
+
+      const rlh = rain_last_hour_mm || 0.0;
+      const rain_boost = clamp(rlh / 2.0, 0.0, 1.0); // 2mm/hr -> up to +20
+      const prob_with_boost = base_prob + 20.0 * rain_boost;
+
+      return clamp(prob_with_boost, 0.0, 100.0);
+    }
+
+    function classifyRisk(prob) {
+      if (prob >= 70) return {tag:"HIGH",   cls:"bad",  hint:"High likelihood of rain. Prepare cover."};
+      if (prob >= 40) return {tag:"WATCH",  cls:"warn", hint:"Moist + cloudy. Stay alert."};
+      return             {tag:"NORMAL", cls:"ok",   hint:"Low short-term rain risk."};
+    }
+
+    // ==========================================================
+    // SECTION 2. DOM refs
+    // ==========================================================
+    const qs = id => document.getElementById(id);
+
+    const tempValEl     = qs("tempVal");
+    const dewValEl      = qs("dewVal");
+    const dpdValEl      = qs("dpdVal");
+    const rhValEl       = qs("rhVal");
+    const cloudValEl    = qs("cloudVal");
+    const rainProbValEl = qs("rainProbVal");
+    const rainHintEl    = qs("rainHint");
+    const riskLabelEl   = qs("riskLabel");
+    const latEl         = qs("lat");
+    const lonEl         = qs("lon");
+    const lastUpdateEl  = qs("lastUpdate");
+    const linkStatusEl  = qs("linkStatus");
+    const onlineDotEl   = qs("onlineDot");
+    const logBoxEl      = qs("logBox");
+
+    const latInputEl    = qs("latInput");
+    const lonInputEl    = qs("lonInput");
+    const apiKeyInputEl = qs("apiKeyInput");
+    const connectBtn    = qs("connectSerialBtn");
+    const refreshBtn    = qs("refreshWeatherBtn");
+
+    // ==========================================================
+    // SECTION 3. State
+    // ==========================================================
+    let latestTempC = null;          // from ESP32 packet data[0]
+    let latestRH = null;             // from OpenWeather (%)
+    let latestCloud = null;          // from OpenWeather (%)
+    let latestRain1h = 0.0;          // from OpenWeather (mm rain in last 1h)
+    let port = null;
+    let reader = null;
+    let readingSerial = false;
+
+    // ==========================================================
+    // SECTION 4. Weather API fetch (OpenWeather current weather)
+    //
+    // We'll call:
+    //   https://api.openweathermap.org/data/2.5/weather?lat=..&lon=..&appid=APIKEY&units=metric
+    //
+    // Response fields of interest:
+    //   main.humidity       -> %
+    //   clouds.all          -> %
+    //   rain["1h"]          -> mm in last hour (optional)
+    // ==========================================================
+    async function fetchWeatherNow() {
+      const lat = parseFloat(latInputEl.value);
+      const lon = parseFloat(lonInputEl.value);
+      const apiKey = apiKeyInputEl.value.trim();
+
+      if (!apiKey) {
+        appendLog("ERROR: Missing OpenWeather API key");
+        return;
+      }
+      if (Number.isNaN(lat) || Number.isNaN(lon)) {
+        appendLog("ERROR: Invalid lat/lon");
+        return;
+      }
+
+      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+
+      try {
+        const resp = await fetch(url);
+        const data = await resp.json();
+
+        // Extract
+        latestRH = data?.main?.humidity ?? latestRH;
+        latestCloud = data?.clouds?.all ?? latestCloud;
+
+        if (data?.rain && data.rain["1h"] !== undefined) {
+          latestRain1h = data.rain["1h"];
+        } else {
+          latestRain1h = 0.0;
+        }
+
+        // Update coords shown at top (fallback if GPS is dead)
+        latEl.textContent = lat.toFixed(5);
+        lonEl.textContent = lon.toFixed(5);
+
+        appendLog("Weather updated: RH=" + latestRH + "% Cloud=" + latestCloud + "% Rain1h=" + latestRain1h + "mm");
+
+        refreshUI();
+      } catch (err) {
+        appendLog("Weather fetch fail: " + err);
+      }
+    }
+
+    // ==========================================================
+    // SECTION 5. Serial handling with Web Serial API
+    //
+    // This will prompt you to pick the USB device (ESP32).
+    // The ESP32 should print lines of JSON like:
+    // {"cmd":0.00,"time":1156.50,"type":3.00,"data":[32.79,0.00,0.00,0.00,0.00,0.00]}
+    //
+    // We parse data[0] as temperature °C.
+    // ==========================================================
+    async function connectSerial() {
+      try {
+        port = await navigator.serial.requestPort();
+        await port.open({ baudRate: 115200 });
+
+        linkStatusEl.textContent = "SERIAL OK";
+        linkStatusEl.classList.remove("no-signal");
+        onlineDotEl.style.background = "var(--good)";
+        onlineDotEl.style.boxShadow = "0 0 10px var(--good),0 0 30px var(--good)";
+        appendLog("Serial connected.");
+
+        const decoder = new TextDecoderStream();
+        const readableStreamClosed = port.readable.pipeTo(decoder.writable);
+        reader = decoder.readable.getReader();
+        readingSerial = true;
+
+        readSerialLoop().catch(err => {
+          appendLog("Serial read error: " + err);
+        });
+
+      } catch (err) {
+        appendLog("Serial connect failed: " + err);
+        linkStatusEl.textContent = "NO SERIAL";
+        linkStatusEl.classList.add("no-signal");
+        onlineDotEl.style.background = "var(--bad)";
+        onlineDotEl.style.boxShadow = "0 0 10px var(--bad),0 0 30px var(--bad)";
+      }
+    }
+
+    async function readSerialLoop() {
+      let buffer = "";
+      while (readingSerial) {
+        const { value, done } = await reader.read();
+        if (done) {
+          appendLog("Serial reader closed");
+          break;
+        }
+
+        buffer += value;
+
+        // Split by newline in case ESP32 sends lines separated by '\n'
+        let lines = buffer.split(/\r?\n/);
+        // keep the last partial line in buffer
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          handleSerialLine(line.trim());
+        }
+      }
+    }
+
+    function handleSerialLine(line) {
+      if (!line) return;
+
+      // Show raw line in log (trim so it doesn't explode UI)
+      appendLog("RX " + line);
+
+      // Try parse JSON
+      try {
+        const obj = JSON.parse(line);
+        // Expect obj.data[0] = temperature C
+        if (obj && obj.data && obj.data.length > 0) {
+          const tempCandidate = obj.data[0];
+          if (typeof tempCandidate === "number") {
+            latestTempC = tempCandidate;
+          }
+        }
+
+        // Optional: time from packet, could feed lastUpdate
+        if (obj && typeof obj.time === "number") {
+          const nowLocal = new Date().toLocaleTimeString();
+          lastUpdateEl.textContent = nowLocal + " (t=" + obj.time.toFixed(2) + "s)";
+        } else {
+          lastUpdateEl.textContent = new Date().toLocaleTimeString();
+        }
+
+        refreshUI();
+      } catch (err) {
+        appendLog("JSON parse error: " + err);
+      }
+    }
+
+    // ==========================================================
+    // SECTION 6. UI refresh logic
+    //
+    // This recomputes dew point, delta T, rain probability.
+    // Needs:
+    //   latestTempC from ESP32
+    //   latestRH, latestCloud, latestRain1h from OpenWeather
+    // ==========================================================
+    function refreshUI() {
+      // Update temp field
+      if (typeof latestTempC === "number") {
+        tempValEl.textContent = latestTempC.toFixed(2);
+      }
+
+      // Update RH / Cloud
+      if (typeof latestRH === "number") {
+        rhValEl.textContent = latestRH.toFixed(0);
+      }
+      if (typeof latestCloud === "number") {
+        cloudValEl.textContent = latestCloud.toFixed(0);
+      }
+
+      // Compute dew point + rain probability if we have required data
+      if (
+        typeof latestTempC === "number" &&
+        typeof latestRH === "number" &&
+        typeof latestCloud === "number"
+      ) {
+        const Td = dewPointCelsius(latestTempC, latestRH);
+        const DPD = latestTempC - Td;
+        const prob = rainProbability(DPD, latestRH, latestCloud, latestRain1h);
+
+        dewValEl.textContent = Td.toFixed(2);
+        dpdValEl.textContent = DPD.toFixed(2);
+        rainProbValEl.textContent = prob.toFixed(0);
+
+        // risk classification
+        const risk = classifyRisk(prob);
+        riskLabelEl.textContent = risk.tag;
+        riskLabelEl.className = "risk-chip " + risk.cls;
+        rainHintEl.textContent = risk.hint;
+      } else {
+        // if missing something, show waiting
+        if (typeof latestTempC !== "number") {
+          rainHintEl.textContent = "Waiting for ESP32 temperature...";
+        } else if (typeof latestRH !== "number") {
+          rainHintEl.textContent = "Waiting for humidity from OpenWeather...";
+        } else if (typeof latestCloud !== "number") {
+          rainHintEl.textContent = "Waiting for cloud cover from OpenWeather...";
+        }
+      }
+    }
+
+    // ==========================================================
+    // SECTION 7. Small utilities
+    // ==========================================================
+    function appendLog(msg) {
+      const timestamp = new Date().toLocaleTimeString();
+      logBoxEl.textContent =
+        `[${timestamp}] ${msg}\n` + logBoxEl.textContent;
+    }
+
+    // ==========================================================
+    // SECTION 8. Wire up buttons
+    // ==========================================================
+    connectBtn.addEventListener("click", () => {
+      if (!("serial" in navigator)) {
+        appendLog("ERROR: Web Serial API not supported in this browser. Use Chrome / Edge.");
+        return;
+      }
+      connectSerial();
+    });
+
+    refreshBtn.addEventListener("click", () => {
+      fetchWeatherNow().then(refreshUI);
+    });
+
+    // On load, set UI to "disconnected"
+    linkStatusEl.textContent = "NO SERIAL";
+    linkStatusEl.classList.add("no-signal");
+    onlineDotEl.style.background = "var(--bad)";
+    onlineDotEl.style.boxShadow = "0 0 10px var(--bad),0 0 30px var(--bad)";
+
+    // We won't auto-fetch weather because we need API key first.
+    // User will press "Refresh Weather".
+  </script>
+</body>
+</html>
