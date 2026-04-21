@@ -8,8 +8,8 @@ Servo deployServo;
 int servoPin = 2; // PWM pin connected to the servo signal wire
 
 // Constants
-const float Launch_threshold = 0;  // G-force threshold from Z-axis
-const float Eject_threshold = 8.84;      // sqrt(x^2 + y^2) | 8.0 = 54.6 degrees || 7.83 = 53 degrees || 6.93 = 45 degree || 9.8 = 90 degree || 8.84 = 60 degree || 9.21 = 70 degree
+const float Launch_threshold = 0;     // G-force threshold from Z-axis
+const float Eject_threshold = 8.84;   // sqrt(x^2 + y^2) | 8.0 = 54.6 degrees || 7.83 = 53 degrees || 6.93 = 45 degree || 9.8 = 90 degree || 8.84 = 60 degree || 9.21 = 70 degree
 const float freefall_threshold = 2;   // sqrt(ax² + ay² + az²) | < 2 = freefall
 const int emergency_time = 10000;     // milliseconds
 const int normal_eject_delay = 2000;  // milliseconds | default = 2000
