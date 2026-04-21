@@ -3,7 +3,7 @@
 Adafruit_BMP280 bmp;
 
 bool initBMP(float sl) {
-  if (!bmp.begin()) {
+  if (!bmp.begin(0x76)) {
     Serial.println("BMP Not Found!!!");
     return false;
   } else {

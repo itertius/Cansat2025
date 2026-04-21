@@ -8,6 +8,7 @@
 extern TinyGPSPlus gps;
 
 void initGPS();
-bool readGPS(float &lat, float &lon, float &alt);
+void serviceGPS();
+bool getLastFix(float* lat, float* lon, float* alt, unsigned long* ageMs);
 
 #endif
